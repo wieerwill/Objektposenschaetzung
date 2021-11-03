@@ -1,0 +1,102 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[ngerman]{babel}
+\usepackage{lmodern}
+\usepackage{hyphenat}
+\usepackage[babel,german=quotes]{csquotes}
+\usepackage[left=1cm,top=1cm,right=1cm]{geometry}
+\usepackage{amsmath,amsthm,amsfonts,amssymb}
+\usepackage{color,graphicx,overpic}
+\usepackage{pdflscape}
+\usepackage{verbatim}
+\usepackage[hidelinks,pdfencoding=auto]{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Proseminar Objektposenschätzung}
+    }
+\usepackage{multicol}
+%\setlength{\columnseprule}{1pt}
+%\setlength{\columnsep}{1cm}
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+
+\usepackage[style=alphabetic]{biblatex}
+\setlength{\bibitemsep}{1em} 
+\bibliography{Proseminar}
+
+\usepackage{glossaries}
+\setglossarystyle{list} 
+\makeglossaries
+\newglossaryentry{cnn}{
+    name=Convolutional Neural Network,
+    description={Besitzt pro Convolutional Layer mehrere Filterkerne, sodass Schichten an Feature Maps entstehen, die jeweils die gleiche Eingabe bekommen, jedoch aufgrund unterschiedlicher Gewichtsmatrizen unterschiedliche Features extrahieren.}
+}
+\newglossaryentry{quaternion}{
+    name={Quaternion-Darstellung},
+    description={Darstellung $V$ einer Gruppe $G$, die einen $G$-invarianten Homomorphismus $J:V\rightarrow V$ besitzt, der antilinear ist und $J^2=-Id$ erfüllt.}
+    }
+
+\title{Proseminar Objektposenschätzung}
+\author{Robert Jeutter}
+\date{\today}
+\pdfinfo{
+    /Title (Proseminar Objektposenschätzung)
+    /Creator (TeX)
+    /Producer (pdfTeX 1.40.0)
+    /Author (Robert Jeutter)
+    /Subject (Deeplearning, Robotische Manipulation)
+}
+
+\begin{document}
+\maketitle
+
+\begin{multicols*}{2}
+    \textbf{Zur Interaktion mit seiner Umwelt muss ein Roboter die Lage der Objekte in seiner Umgebung erkennen. Der Artikel schafft einen Überblick über aktuelle Verfahren mit Fokus auf Verfahren die keine Objektmodelle benötigen. }
+    %Damit ein Roboter einen Gegenstand greifen kann, ist es meist notwendig die genaue Lage des Objektes zu kennen. Dies kann sowohl über klassische Verfahren als auch über Deep-Learning-Verfahren erreicht werden. Ziel dieses Hauptseminars ist es den Stand der Technik für die Objektposenschätzung aufzuarbeiten und vorzustellen. Der Fokus sollte dabei auf Verfahren liegen, bei denen zuvor kein Objektmodell benötig wird, sodass auch die Lage von unbekannten Objekten geschätzt werden kann.
+
+    \section{Motivation}
+    Roboter in Industrie und Assistenz treffen häufig auf nicht vorhersehbare oder vorab programmierbare Herausforderungen. Damit
+    Die Schätzung der 6D-Position bekannter Objekte ist wichtig für die Interaktion von Robotern mit der realen Welt wichtig. Das Problem ist aufgrund der Vielfalt der Objekte sowie der Komplexität einer Szene, die durch Unordnung und Verdeckungen zwischen den Objekten verursacht wird, eine Herausforderung.
+
+    \section{Anforderungen}
+    Objektmodelle,  schablonenbasierte Methoden und merkmalsbasierte Methoden 
+
+    Hardware-Ausstattung: 2D/3D Kamera, RGB-D, positionsveränderung der Kamera
+
+    Verarbeitung: Komplexität, Geschwindigkeit, Genauigkeit
+
+    Verkettete Verarbeitung: verarbeitung eines Bilderstroms statt einzelner Bilder für sich
+
+    \section{Verschiedene Verfahren}
+    \subsection{BundleTrack\cite{BundleTrack}}
+
+    \subsection{DeepIM\cite{Deepim}}
+
+    \subsection{MaskFusion\cite{MaskFusion}}
+
+    \subsection{Neural Analysis-by-Synthesis\cite{CategoryLevelObject}}
+
+    \subsection{6-PACK\cite{6pack}}
+
+    \subsection{PoseCNN\cite{PoseCNN}}
+    neues \Gls{cnn} für die 6D-Objektposenschätzung. PoseCNN schätzt die 3D-Verschiebung eines Objekts, indem es sein Zentrum im Bild lokalisiert und seinen Abstand zur Kamera vorhersagt. Die 3D-Rotation des Objekts wird durch Regression auf eine \Gls{quaternion} geschätzt. Dabei führt man eine neue Verlustfunktion ein, die es PoseCNN ermöglicht, symmetrische Objekte zu behandeln.
+
+    \subsection{Robust Gaussian Filter\cite{GaussianFilter}}
+
+    \section{Vergleich verschiedener Verfahren}
+
+    \section{Fazit}
+
+\end{multicols*}
+
+\medskip
+
+\printglossary[title=Glossar]
+
+\printbibliography[title=Literatur]
+
+\end{document}
