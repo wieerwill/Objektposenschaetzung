@@ -64,105 +64,98 @@
     %Die Schätzung der 6D-Position bekannter Objekte ist wichtig für die Interaktion von Robotern mit der realen Welt. 
     Die Erkennung von Objekten und die Schätzung ihrer Lage in 3D hat eine Vielzahl von Anwendungen in der Robotik. So ist beispielsweise die Erkennung der 3D-Lage und Ausrichtung von Objekten wichtig für die Robotermanipulation. Sie ist auch bei Aufgaben der Mensch-Roboter-Interaktion nützlich, z. B. beim Lernen aus Demonstrationen.
     %Für Robotermanipulation sind häufig Informationen über die Position des manipulierten Objekts erforderlich. 
-    In einigen Fällen kann dies durch Vorwärtskinematik erreicht werden, wobei angenommen wird, dass die Bewegung des Objekts der Bewegung des Endeffektors entspricht. Häufig reicht die Vorwärtskinematik jedoch nicht aus, um die Lage des Objekts genau zu bestimmen. Dies kann durch Schlupf beim Greifen oder bei der Manipulation mit der Hand, bei der Übergabe oder durch die Nachgiebigkeit eines Saugnapfes bedingt sein. In diesen Fällen ist eine dynamische Schätzung der Objektposition aus visuellen Daten wünschenswert.
-    Methoden zur 6D-Positionsschätzung aus Einzelbildern wurden ausgiebig untersucht. Einige von ihnen sind schnell und können die Pose für jedes neue Bild von Grund auf neu schätzen. Dies ist jedoch redundant, weniger effizient und führt zu weniger kohärenten Schätzungen für aufeinanderfolgende Bilder. Andererseits kann die Verfolgung von 6D-Objektposen über Bildsequenzen bei einer anfänglichen Posenschätzung die Schätzgeschwindigkeit verbessern und gleichzeitig kohärente und genaue Posen liefern, indem die zeitliche Konsistenz genutzt wird.
+    %In einigen Fällen kann dies durch Vorwärtskinematik erreicht werden, wobei angenommen wird, dass die Bewegung des Objekts der Bewegung des Endeffektors entspricht. Häufig reicht die Vorwärtskinematik jedoch nicht aus, um die Lage des Objekts genau zu bestimmen. Dies kann durch Schlupf beim Greifen oder bei der Manipulation mit der Hand, bei der Übergabe oder durch die Nachgiebigkeit eines Saugnapfes bedingt sein. In diesen Fällen ist eine dynamische Schätzung der Objektposition aus visuellen Daten wünschenswert.
 
+    %Methoden zur 6D-Positionsschätzung aus Einzelbildern wurden ausgiebig untersucht. Einige von ihnen sind schnell und können die Pose für jedes neue Bild von Grund auf neu schätzen. Dies ist jedoch redundant, weniger effizient und führt zu weniger kohärenten Schätzungen für aufeinanderfolgende Bilder. Andererseits kann die Verfolgung von 6D-Objektposen über Bildsequenzen bei einer anfänglichen Posenschätzung die Schätzgeschwindigkeit verbessern und gleichzeitig kohärente und genaue Posen liefern, indem die zeitliche Konsistenz genutzt wird.
     Traditionell wird das Problem der Objektposenschätzung durch den Abgleich von Merkmalspunkten zwischen 3D-Modellen und Bildern angegangen. Diese Methoden setzen jedoch voraus, dass die Objekte reichhaltig texturiert sind, um Merkmalspunkte für den Abgleich zu erkennen. Daher sind sie nicht in der Lage, mit Objekten ohne Textur umzugehen. %Bei merkmalsbasierten Methoden werden lokale Merkmale entweder aus Points of Interest oder aus jedem Pixel des Bildes extrahiert und mit den Merkmalen der 3D-Modelle abgeglichen, um 2D-3D-Korrespondenzen herzustellen, aus denen 6D-Posen wiederhergestellt werden können. Merkmalsbasierte Methoden sind in der Lage, mit Verdeckungen zwischen Objekten umzugehen. Sie benötigen jedoch ausreichende Texturen auf den Objekten, um die lokalen Merkmale berechnen zu können. Um mit texturlosen Objekten umzugehen, wurden mehrere Methoden vorgeschlagen, um Merkmalsdeskriptoren mit Hilfe von maschinellen Lernverfahren zu lernen. Einige Ansätze wurden vorgeschlagen, um direkt auf die 3D-Objektkoordinaten jedes Pixels zu regressieren, um die 2D-3D-Korrespondenzen herzustellen. Die 3D-Koordinatenregression stößt jedoch bei symmetrischen Objekten auf Mehrdeutigkeiten.
     Die meisten bestehenden Ansätze zur Objektposenschätzung setzen den Zugriff auf das 3D-Modell einer Objektinstanz voraus. Der Zugang zu solchen 3D-Modellen erschwert die Verallgemeinerung auf neue, unbekannte Instanzen. %Um diese Einschränkung zu überwinden, haben neuere Ansätze diese Annahme gelockert und benötigen nur 3D-Modelle auf Kategorieebene für die 6D-Positionsschätzung. Dies wird häufig durch Training mit einer großen Anzahl von CAD-Modellen derselben Kategorie erreicht. Obwohl für bereits bekannte Objektkategorien vielversprechende Ergebnisse erzielt wurden, gibt es immer noch Einschränkungen z.B. durch die gerine Vielfalt von Kategorien. Beliebte 3D-Modelldatenbanken wie ShapeNet\footnote{\href{https://shapenet.org/}{shapenet.org}} und ModelNet40\footnote{\href{https://modelnet.cs.princeton.edu/}{modelnet.cs.princeton.edu}} enthalten 55 bzw. 40 Kategorien. Dies reicht bei weitem nicht aus, um die verschiedenen Objektkategorien in der realen Welt abzudecken. 
-    Darüber hinaus erfordern 3D-Modelldatenbanken oft einen nicht unerheblichen manuellen Aufwand und Expertenwissen, um sie zu erstellen, wobei Schritte wie Scannen, Netzverfeinerung oder CAD-Design erforderlich sind. Zusätzliche Komplexität einer Szene, die durch Unordnung und Verdeckungen zwischen den Objekten verursacht wird, senkt die korrekte Erkennung bei modellbasierten Verfahren deutlich.
-    Bei schablonenbasierten Methoden wird eine starre Schablone konstruiert und verwendet, um verschiedene Stellen im Eingabebild zu scannen. An jeder Stelle wird ein Ähnlichkeitswert berechnet, und die beste Übereinstimmung wird durch den Vergleich dieser Ähnlichkeitswerte ermittelt. Schablonenbasierte Methoden sind nützlich für die Erkennung texturloser Objekte. Sie können jedoch nicht sehr gut mit Verdeckungen zwischen Objekten umgehen, da die Vorlage einen niedrigen Ähnlichkeitswert hat, wenn das Objekt verdeckt ist.
-    Alternativ dazu können Methoden, die eine Regression von Bildpixeln auf 3D-Objektkoordinaten erlernen, um 2D-3D-Korrespondenzen für die 6D-Positionsschätzung herzustellen, nicht mit symmetrischen Objekten umgehen. Zudem können bei der Verfolgung durch solche dynamische on-the-fly Rekonstruktion von Objekten Fehler entstehen, wenn Beobachtungen mit fehlerhaften Posenschätzungen in das globale Modell einfließen. Diese Fehler wirken sich nachteilig auf die Modellverfolgung in nachfolgenden Bildern aus.
+    Darüber hinaus erfordern 3D-Modelldatenbanken oft einen nicht unerheblichen manuellen Aufwand und Expertenwissen, um sie zu erstellen, wobei Schritte wie Scannen, Netzverfeinerung oder CAD-Design erforderlich sind.
+    Unordnung und Verdeckungen zwischen den Objekten senken die korrekte Erkennung bei modellbasierten Verfahren zudem deutlich.
+    Bei schablonenbasierten Methoden wird eine starre Schablone konstruiert und verwendet, um verschiedene Stellen im Eingabebild zu scannen. An jeder Stelle wird ein Ähnlichkeitswert berechnet, und die beste Übereinstimmung wird durch den Vergleich dieser Ähnlichkeitswerte ermittelt.
+    Schablonenbasierte Methoden sind nützlich für die Erkennung texturloser Objekte. Sie können jedoch nicht sehr gut mit Verdeckungen zwischen Objekten umgehen, da die Vorlage einen niedrigen Ähnlichkeitswert hat, wenn das Objekt verdeckt ist.
+    Alternativ dazu können Methoden, die eine Regression von Bildpixeln auf 3D-Objektkoordinaten erlernen, um 2D-3D-Korrespondenzen für die 6D-Positionsschätzung herzustellen, nicht mit symmetrischen Objekten umgehen.
+    Außerdem können bei der Verfolgung durch solche dynamische on-the-fly Rekonstruktion von Objekten Fehler entstehen, wenn Beobachtungen mit fehlerhaften Posenschätzungen in das globale Modell einfließen. Diese Fehler wirken sich nachteilig auf die Modellverfolgung in nachfolgenden Bildern aus.
 
+    \section{Kategorisierung}
     Motiviert durch die oben genannten Einschränkungen, zielt diese Arbeit auf eine genaue, robuste 6D-Objekterkennung ab, die auf neuartige Objekte ohne 3D-Modelle verallgemeinert werden kann.
-
-    \section{Anforderungen}
-    Für verschiedene Anwendungszenarien bestehen unterschiedliche Anforderungen und Möglichkeiten um ein bestimmtes Verfahren verwenden zu können. Um eine schnelle Übersicht über die Verfahren geben zu können wird jedes in mehreren Kategorien eingeteilt und verglichen.
-
     Die Kategorisierung aller Verfahren erfolgt nach folgendem Schemata
     \begin{description*}
-        \item[Objektmodelle] müssen für das Training oder Nutzung Objektmodelle (2D, 3D, CAD), Schablonen-Modelle oder merkmalsbasierte Modelle vorhanden sein?
-        \item[Video-Input] verarbeitet das Verfahren 2D Bilder, 3D Bilder mit Tiefenwahrnehmung und kann die Position der Kamera verändern?
-        \item[genutzte Datensätze] mit welchen Datensätzen wurde das Verfahren trainiert oder getestet?
+        \item[Modell] Müssen für das Training oder Nutzung merkmalsbasierte oder Objektmodelle (2D, 3D, CAD) vorhanden sein?
+        \item[Video-Input] Verarbeitet das Verfahren 2D Bilder, 3D Bilder mit Tiefenwahrnehmung?
+        \item[Datensatz] mit welchen Datensätzen wurde das Verfahren trainiert oder getestet?
         \item[Genauigkeit] Wie akkurat ist die Objektposenschätzung im Vergleich?
-        \item[Ressourcenintensivität] Wie Ressourcenintensiv ist das Verfahren und werden spezielle Hardware benötigt?
-        \item[Laufzeit] mit welcher Geschwindigkeit ist die Verarbeitung von Eingabedaten möglich und stabil?
+        \item[Ressourcen] Wie Ressourcenintensiv ist das Verfahren? Wird spezielle Hardware benötigt?
+        \item[Laufzeit] Mit welcher Geschwindigkeit ist die Verarbeitung von Eingabedaten möglich und stabil?
     \end{description*}
 
     \section{Verschiedene Verfahren}
     \subsection{BundleTrack\cite{BundleTrack}}
     \begin{description*}
-        \item[Objektmodelle]
+        \item[Modell]
         \item[Video-Input]
-        \item[genutzte Datensätze]
+        \item[Datensatz]
         \item[Genauigkeit]
-        \item[Ressourcenintensivität]
+        \item[Ressourcen]
         \item[Laufzeit]
     \end{description*}
-    BundleTrack ist ein Framework für die 6D-Positionsverfolgung neuartiger Objekte, das nicht von 3D-Modellen auf Instanz- oder Kategorieebene abhängt. Es nutzt komplementären Eigenschaften für die Segmentierung und robuste Merkmalsextraktion sowie die speichererweiterte Pose-Graph-Optimierung für die räumlich-zeitliche Konsistenz. Dies ermöglicht eine langfristige, abdriftarme Verfolgung in verschiedenen anspruchsvollen Szenarien, einschließlich erheblicher Verdeckungen und Objektbewegungen.
-
-    Im Vergleich zu modernen Methoden, die auf einem CAD-Modell der Objektinstanz basieren, wird eine vergleichbare Leistung erzielt, obwohl die vorgeschlagene Methode weniger Informationen benötigt. Eine effiziente Implementierung in CUDA ermöglicht eine Echtzeitleistung von 10 Hz für das gesamte System.
-    Der Code ist verfügbar unter: \href{https://github.com/wenbowen123/BundleTrack}{https://github.com/wenbowen123/BundleTrack}
 
     \subsection{DeepIM\cite{Deepim}}
     \begin{description*}
-        \item[Objektmodelle]
+        \item[Modell]
         \item[Video-Input]
-        \item[genutzte Datensätze]
+        \item[Datensatz]
         \item[Genauigkeit]
-        \item[Ressourcenintensivität]
+        \item[Ressourcen]
         \item[Laufzeit]
     \end{description*}
 
     \subsection{MaskFusion\cite{MaskFusion}}
     \begin{description*}
-        \item[Objektmodelle]
+        \item[Modell]
         \item[Video-Input]
-        \item[genutzte Datensätze]
+        \item[Datensatz]
         \item[Genauigkeit]
-        \item[Ressourcenintensivität]
+        \item[Ressourcen]
         \item[Laufzeit]
     \end{description*}
 
     \subsection{Neural Analysis-by-Synthesis\cite{CategoryLevelObject}}
     \begin{description*}
-        \item[Objektmodelle]
+        \item[Modell]
         \item[Video-Input]
-        \item[genutzte Datensätze]
+        \item[Datensatz]
         \item[Genauigkeit]
-        \item[Ressourcenintensivität]
+        \item[Ressourcen]
         \item[Laufzeit]
     \end{description*}
 
     \subsection{6-PACK\cite{6pack}}
     \begin{description*}
-        \item[Objektmodelle]
+        \item[Modell]
         \item[Video-Input]
-        \item[genutzte Datensätze]
+        \item[Datensatz]
         \item[Genauigkeit]
-        \item[Ressourcenintensivität]
+        \item[Ressourcen]
         \item[Laufzeit]
     \end{description*}
 
     \subsection{PoseCNN\cite{PoseCNN}}
     \begin{description*}
-        \item[Objektmodelle]
+        \item[Modell]
         \item[Video-Input]
-        \item[genutzte Datensätze]
+        \item[Datensatz]
         \item[Genauigkeit]
-        \item[Ressourcenintensivität]
+        \item[Ressourcen]
         \item[Laufzeit]
     \end{description*}
-    Ein neues \Gls{cnn} für die 6D-Objektposenschätzung. PoseCNN schätzt die 3D-Verschiebung eines Objekts, indem es sein Zentrum im Bild lokalisiert und seinen Abstand zur Kamera vorhersagt. Die 3D-Rotation des Objekts wird durch Regression auf eine \Gls{quaternion} geschätzt. Dabei führt man eine neue Verlustfunktion ein, die es PoseCNN ermöglicht, symmetrische Objekte zu behandeln. Erreicht Ende-zu-Ende 6D Posenschätzung und ist sehr robust gegenüber Verdeckungen zwischen Objekten.
-
-    PoseCNN entkoppelt die Schätzung von 3D-Rotation und 3D-Translation. Es schätzt die 3D-Verschiebung durch Lokalisierung des Objektzentrums und Vorhersage des Zentrumsabstands. Durch Regression jedes Pixels auf einen Einheitsvektor in Richtung des Objektzentrums kann das Zentrum unabhängig vom Maßstab robust geschätzt werden. Noch wichtiger ist, dass die Pixel das Objektzentrum auch dann wählen, wenn es von anderen Objekten verdeckt wird. Die 3D-Drehung wird durch Regression auf eine Quaternion-Darstellung vorhergesagt. Es werden zwei neue Verlustfunktionen für die Rotationsschätzung eingeführt, wobei der ShapeMatch-Verlust für symmetrische Objekte entwickelt wurde. Dadurch ist PoseCNN in der Lage, Okklusion und symmetrische Objekte in unübersichtlichen Szenen zu verarbeiten. Dies eröffnet den Weg zur Verwendung von Kameras mit einer Auflösung und einem Sichtfeld, die weit über die derzeit verwendeten Tiefenkamerasysteme hinausgehen. Wir stellen fest, dass SLOSS manchmal zu lokalen Minimums im Pose-Raum führt, ähnlich wie ICP. Es wäre interessant, in Zukunft einen effizienteren Umgang mit symmetrischen Objekten in der 6D-Positionsschätzung zu erforschen.
 
     \subsection{Robust Gaussian Filter\cite{GaussianFilter}}
     \begin{description*}
-        \item[Objektmodelle]
+        \item[Modell]
         \item[Video-Input]
-        \item[genutzte Datensätze]
+        \item[Datensatz]
         \item[Genauigkeit]
-        \item[Ressourcenintensivität]
+        \item[Ressourcen]
         \item[Laufzeit]
     \end{description*}
 
