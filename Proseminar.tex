@@ -11,6 +11,7 @@
 \usepackage{pdflscape}
 \usepackage{verbatim}
 \usepackage{mdwlist} %less space for lists
+\usepackage{gensymb} %degree symbol
 \usepackage[hidelinks,pdfencoding=auto]{hyperref}
 \hypersetup{
     colorlinks=true,
@@ -40,6 +41,34 @@
     name={Quaternion-Darstellung},
     description={Darstellung $V$ einer Gruppe $G$, die einen $G$-invarianten Homomorphismus $J:V\rightarrow V$ besitzt, der antilinear ist und $J^2=-Id$ erfüllt.}
     }
+\newglossaryentry{NOCS}{
+    name={NOCS},
+    description={Der Datensatz enthält 6 Objektkategorien: Flasche, Schüssel, Kamera, Dose, Laptop und Becher. Der Trainingssatz besteht aus: 7 realen Videos mit insgesamt 3 Instanzen jeder Kategorie, die mit Grundwahrheits-Posen annotiert sind; und 275K Frames synthetischer Daten, die mit 1085 Instanzen aus den oben genannten 6 Kategorien unter Verwendung einer 3D-Modell-Datenbank ShapeNetCore mit zufälligen Posen und Objektkombinationen in jeder Szene erzeugt wurden. Der Testsatz besteht aus 6 realen Videos, die 3 verschiedene ungesehene Instanzen innerhalb jeder Kategorie enthalten, was zu 18 verschiedenen Objektinstanzen und insgesamt 3 Frames führt.}
+    }
+\newglossaryentry{YCBInEOAT}{
+    name={YCBInEOAT},
+    description={Dieser Datensatz hilft, die Effektivität der 6D-Positionsverfolgung während der Robotermanipulation zu überprüfen. Er wurde ursprünglich entwickelt, um Ansätze zu bewerten, die auf CAD-Modellen basieren. Im Gegensatz zum NOCS-Datensatz, bei dem die Objekte statisch auf einer Tischplatte platziert und von einer beweglichen Kamera erfasst werden, enthält YCBInEOAT 9 Videosequenzen, die von einer statischen RGB-D-Kamera aufgenommen wurden, während die Objekte dynamisch manipuliert werden. Es gibt drei Arten der Manipulation: (1) einarmiges Greifen und Platzieren, (2) Manipulation innerhalb der Hand und (3) Greifen und Übergeben zwischen den Armen zur Platzierung. Diese Szenarien und die verwendeten Endeffektoren machen die direkte Berechnung von posen aus Vorwärtskinematik unzuverlässig. Die Videos beinhalten 5 YCB Objekte: Senfglas, Tomatensuppendose, Zuckerbox, Bleichereiniger und eine Keksbox.}}
+\newglossaryentry{55cm}{
+    name={5\textdegree 5cm},
+    description={Prozentsatz der Schätzungen mit einem Orientierungsfehler $<5$\textdegree und einem Translationsfehler $< 5cm$ - je höher, desto besser}
+}
+\newglossaryentry{IoU25}{
+    name={IoU25},
+    description={(Intersection over Union) Prozentualer Anteil der Fälle, in denen die Überschneidung von Vorhersage und 3D Bounding Box größer ist als 25\% ihrer Vereinigung - je höher, desto besser
+    besser}
+}
+\newglossaryentry{Rerr}{
+    name={R\_err},%R_{err}
+    description={mittlerer Orientierungsfehler in Grad - je geringer desto besser}
+}
+\newglossaryentry{Terr}{
+    name={T\_err},%T_{err}
+    description={mittlerer Übersetzungsfehler in Zentimetern - je niedriger, desto besser}
+}
+\newglossaryentry{AUC}{
+    name={AUC},
+    description={Area Under Curve: Die Ergebnisse werden anhand der Genauigkeitsschwelle AUC berechnet, die von ADD gemessen wird, das einen exakten Modellabgleich durchführt, und ADD-S, das für die Bewertung symmetrischer Objekte konzipiert ist.}
+}
 
 \title{Proseminar Objektposenschätzung}
 \author{Robert Jeutter}
@@ -89,7 +118,33 @@
     \end{description*}
 
     \section{Verschiedene Verfahren}
-    \subsection{BundleTrack\cite{BundleTrack}}
+    \subsection{BundleTrack}
+    BundleTrack\cite{BundleTrack} ist ein Framework für die 6D-Positionsverfolgung neuartiger Objekte, das nicht von 3D-Modellen auf Instanz- oder Kategorieebene abhängt. Es nutzt komplementären Eigenschaften für die Segmentierung und robuste Merkmalsextraktion sowie die speichererweiterte Pose-Graph-Optimierung für die räumlich-zeitliche Konsistenz. Dies ermöglicht eine langfristige, abdriftarme Verfolgung in verschiedenen anspruchsvollen Szenarien, einschließlich erheblicher Verdeckungen und Objektbewegungen.
+
+    Im Vergleich zu modernen Methoden, die auf einem CAD-Modell der Objektinstanz basieren, wird eine vergleichbare Leistung erzielt, obwohl die vorgeschlagene Methode weniger Informationen benötigt. Eine effiziente Implementierung in CUDA ermöglicht eine Echtzeitleistung von 10 Hz für das gesamte System.
+    Der Code ist verfügbar unter: \href{https://github.com/wenbowen123/BundleTrack}{github.com/wenbowen123/BundleTrack}
+
+    \begin{description*}
+        \item[Modell] ohne Modelle
+        \item[Video-Input] RGB-D
+        \item[Datensatz] \Gls{NOCS}, \Gls{YCBInEOAT}, Davis\cite{Davis}, Youtube-VOS\cite{Youtube-vos}
+        \item[Genauigkeit] kann mit Verdeckung und Objektbewegung gut umgehen. Vergleichbare Leistung mit Methoden mit CAD Modell. Im \Gls{NOCS}-Datensatz:
+        \begin{itemize*}
+            \item $87,4\%$ \Gls{55cm}
+            \item $99,9\%$ \Gls{IoU25}
+            \item $R_{err}=2,4$
+            \item $T_{err}=2,1$
+        \end{itemize*}
+        Ergebnisse aus \Gls{AUC} Messung
+        \begin{itemize*}
+            \item ADD $87,34\%$
+            \item ADD-S $92,53\%$
+        \end{itemize*}
+        \item[Ressourcen] effiziente CUDA-Implementierung, ermöglicht es, das rechenintensive Multi-Pair-Feature-Matching sowie die Pose-Graph-Optimierung für die 6D-Objekt-Positionsverfolgung online auszuführen. Alle Experimente wurden auf einem Standard-Desktop mit Intel Xeon(R) E5-1660 v3@3.00GHz Prozessor und einer einzelnen NVIDIA RTX 2080 Ti GPU durchgeführt.
+        \item[Laufzeit] in CUDA Echtzeit mit 10 Hz
+    \end{description*}
+
+    \subsection{DeepIM}\cite{Deepim}
     \begin{description*}
         \item[Modell]
         \item[Video-Input]
@@ -99,7 +154,28 @@
         \item[Laufzeit]
     \end{description*}
 
-    \subsection{DeepIM\cite{Deepim}}
+    \subsection{MaskFusion}\cite{MaskFusion}
+    \begin{description*}
+        \item[Modell] ohne Modell
+        \item[Video-Input]
+        \item[Datensatz]
+        \item[Genauigkeit] NOCS Datensatz
+        \begin{itemize*}
+            \item $26,5\%$ \Gls{55cm}
+            \item $64,9\%$ \Gls{IoU25}
+            \item $28,5$ \Gls{Rerr}
+            \item $8,3$ \Gls{Terr}
+        \end{itemize*}
+        Ergebnisse aus \Gls{AUC} Messung
+        \begin{itemize*}
+            \item ADD $35,07\%$
+            \item ADD-S $41,88\%$
+        \end{itemize*}
+        \item[Ressourcen]
+        \item[Laufzeit]
+    \end{description*}
+
+    \subsection{Neural Analysis-by-Synthesis}\cite{CategoryLevelObject}
     \begin{description*}
         \item[Modell]
         \item[Video-Input]
@@ -109,7 +185,28 @@
         \item[Laufzeit]
     \end{description*}
 
-    \subsection{MaskFusion\cite{MaskFusion}}
+    \subsection{6-PACK}\cite{6pack}
+    \begin{description*}
+        \item[Modell] Kategorie-bezogene 3D Modellen
+        \item[Video-Input]
+        \item[Datensatz]
+        \item[Genauigkeit] \Gls{NOCS} Datensatz:
+        \begin{itemize*}
+            \item $33,3\%$ \Gls{55cm}
+            \item $94,2\%$ \Gls{IoU25}
+            \item $16,0$ \Gls{Rerr}
+            \item $3,5$ \Gls{Terr}
+        \end{itemize*}
+        Ergebnisse aus \Gls{AUC} Messung
+        \begin{itemize*}
+            \item ADD $-\%$
+            \item ADD-S $-\%$
+        \end{itemize*}
+        \item[Ressourcen]
+        \item[Laufzeit]
+    \end{description*}
+
+    \subsection{PoseCNN}\cite{PoseCNN}
     \begin{description*}
         \item[Modell]
         \item[Video-Input]
@@ -119,35 +216,9 @@
         \item[Laufzeit]
     \end{description*}
 
-    \subsection{Neural Analysis-by-Synthesis\cite{CategoryLevelObject}}
-    \begin{description*}
-        \item[Modell]
-        \item[Video-Input]
-        \item[Datensatz]
-        \item[Genauigkeit]
-        \item[Ressourcen]
-        \item[Laufzeit]
-    \end{description*}
+    Ein neues \Gls{cnn} für die 6D-Objektposenschätzung. PoseCNN schätzt die 3D-Verschiebung eines Objekts, indem es sein Zentrum im Bild lokalisiert und seinen Abstand zur Kamera vorhersagt. Die 3D-Rotation des Objekts wird durch Regression auf eine \Gls{quaternion} geschätzt. Dabei führt man eine neue Verlustfunktion ein, die es PoseCNN ermöglicht, symmetrische Objekte zu behandeln. Erreicht Ende-zu-Ende 6D Posenschätzung und ist sehr robust gegenüber Verdeckungen zwischen Objekten.
 
-    \subsection{6-PACK\cite{6pack}}
-    \begin{description*}
-        \item[Modell]
-        \item[Video-Input]
-        \item[Datensatz]
-        \item[Genauigkeit]
-        \item[Ressourcen]
-        \item[Laufzeit]
-    \end{description*}
-
-    \subsection{PoseCNN\cite{PoseCNN}}
-    \begin{description*}
-        \item[Modell]
-        \item[Video-Input]
-        \item[Datensatz]
-        \item[Genauigkeit]
-        \item[Ressourcen]
-        \item[Laufzeit]
-    \end{description*}
+    PoseCNN entkoppelt die Schätzung von 3D-Rotation und 3D-Translation. Es schätzt die 3D-Verschiebung durch Lokalisierung des Objektzentrums und Vorhersage des Zentrumsabstands. Durch Regression jedes Pixels auf einen Einheitsvektor in Richtung des Objektzentrums kann das Zentrum unabhängig vom Maßstab robust geschätzt werden. Noch wichtiger ist, dass die Pixel das Objektzentrum auch dann wählen, wenn es von anderen Objekten verdeckt wird. Die 3D-Drehung wird durch Regression auf eine Quaternion-Darstellung vorhergesagt. Es werden zwei neue Verlustfunktionen für die Rotationsschätzung eingeführt, wobei der ShapeMatch-Verlust für symmetrische Objekte entwickelt wurde. Dadurch ist PoseCNN in der Lage, Okklusion und symmetrische Objekte in unübersichtlichen Szenen zu verarbeiten. Dies eröffnet den Weg zur Verwendung von Kameras mit einer Auflösung und einem Sichtfeld, die weit über die derzeit verwendeten Tiefenkamerasysteme hinausgehen. Wir stellen fest, dass SLOSS manchmal zu lokalen Minimums im Pose-Raum führt, ähnlich wie ICP. Es wäre interessant, in Zukunft einen effizienteren Umgang mit symmetrischen Objekten in der 6D-Positionsschätzung zu erforschen.
 
     \subsection{Robust Gaussian Filter\cite{GaussianFilter}}
     \begin{description*}
