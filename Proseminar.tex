@@ -64,7 +64,16 @@
 }
 \newglossaryentry{YCBInEOAT}{
     name={YCBInEOAT},
-    description={Dieser Datensatz hilft, die Effektivität der 6D-Positionsverfolgung während der Robotermanipulation zu überprüfen. Er enthält 9 Videosequenzen, die von einer statischen RGB-D-Kamera aufgenommen wurden, während die Objekte dynamisch manipuliert werden. Die Videos beinhalten 5 YCB Objekte: Glas, Dose, Zuckerbox, Bleichereiniger und Keksbox.}}
+    description={Dieser Datensatz hilft, die Effektivität der 6D-Positionsverfolgung während der Robotermanipulation zu überprüfen. Er enthält 9 Videosequenzen, die von einer statischen RGB-D-Kamera aufgenommen wurden, während die Objekte dynamisch manipuliert werden. Die Videos beinhalten 5 YCB Objekte: Glas, Dose, Zuckerbox, Bleichereiniger und Keksbox.}
+}
+\newglossaryentry{Linemod}{
+    name={LINEMOD},
+    description={LINEMOD ist ein RGB+D-Datensatz, der sich zu einem De-facto-Standard-Benchmark für 6D-Positionsschätzungen entwickelt hat. Der Datensatz enthält schlecht texturierte Objekte in einer unübersichtlichen Szene. 15 texturlose Haushaltsgegenstände mit Farbe, Form und Größe. Jedem Objekt ist ein Testbild zugeordnet, das eine kommentierte Objektinstanz mit erheblicher Unordnung, aber nur leichter Verdeckung zeigt.}
+}
+\newglossaryentry{Occlusion}{
+    name={LINEMOD Occlusion},
+    description={Bietet zusätzliche Ground-Truth-Annotationen für alle modellierten Objekte in einer der Testgruppen von LIMEMOD. Dies führt anspruchsvolle Testfälle mit verschiedenen Verdeckungsgraden ein. Die Trainingsbilder sind die gleichen wie die für LIMEMOD.}
+}
 \newglossaryentry{55cm}{
     name={5\textdegree 5cm},
     description={Prozentsatz der Schätzungen mit einem Orientierungsfehler $<5$\textdegree und einem Translationsfehler $< 5cm$ - je höher, desto besser}
@@ -73,6 +82,14 @@
     name={IoU25},
     description={(Intersection over Union) Prozentualer Anteil der Fälle, in denen die Überschneidung von Vorhersage und 3D Bounding Box größer ist als 25\% ihrer Vereinigung - je höher, desto besser
     besser}
+}
+\newglossaryentry{6dpose}{
+    name={6D Pose},
+    description={Die 6D-Positionsmetrik berechnet den durchschnittlichen Abstand zwischen den 3D-Modellpunkten, die mit Hilfe der der geschätzten Pose und der Grundwahrheits-Pose. Für symmetrische Objekte verwenden wir den Abstand der geschlossenen Punkte für die Berechnung des durchschnittlichen Abstands. Eine geschätzte Pose ist korrekt, wenn der durchschnittliche Abstand innerhalb von 10\% des 3D-Modelldurchmessers liegt.}
+}
+\newglossaryentry{2dproj}{
+    name={2D Projection},
+    description={Die 2D-Projektionsmetrik berechnet den durchschnittlichen Abstand der 3D-Modellpunkte die auf das Bild projiziert werden, unter Verwendung der geschätzten Pose und der Grundwahrheits-Pose. Eine geschätzte Pose ist korrekt, wenn der durchschnittliche Abstand kleiner als 5 Pixel ist.}
 }
 \newglossaryentry{Rerr}{
     name={R\_err},%R_{err}
@@ -161,14 +178,22 @@
         \item[Laufzeit] in CUDA Echtzeit mit 10 Hz
     \end{description*}
 
-    \subsection{DeepIM}\cite{Deepim}
+    \columnbreak
+    \subsection{DeepIM}
+    DeepIM\cite{Deepim} basiert auf einem tiefen neuronalen Netzwerk für iterative 6D-Positionsanpassung. Ausgehend von einer anfänglichen 6D-Positionsschätzung eines Objekts in einem Testbild, sagt DeepIM eine relative SE(3)-Transformation voraus, die eine gerenderte Ansicht des Objekts mit dem beobachteten Bild abgleicht.  Bei einer anfänglichen Posenschätzung ist das Netzwerk in der Lage, die Pose iterativ zu verfeinern, indem es das gerenderte Bild mit dem beobachteten Bild abgleicht. Durch die iterative Neudarstellung des Objekts auf der Grundlage der verbesserten Posenschätzungen werden die beiden Eingangsbilder des Netzes immer ähnlicher, wodurch das Netz immer genauere Posenschätzungen erzeugen kann.
+    Das Netzwerk wird so trainiert, dass es eine relative Pose-Transformation vorhersagen kann, indem es eine unverzerrte Darstellung der 3D-Position und 3D-Orientierung und einen iterativen Trainingsprozess verwendet.
     \begin{description*}
-        \item[Modell]
-        \item[Video-Input]
-        \item[Datensatz]
-        \item[Genauigkeit]
-        \item[Ressourcen]
-        \item[Laufzeit]
+        \item[Modell] 3D-CAD-Modell
+        \item[Video-Input] RGB
+        \item[Datensatz] \Gls{Linemod}, \Gls{Occlusion}
+        \item[Genauigkeit] \Gls{Linemod} -Datensatz:
+        \begin{itemize*}
+            \item $85,2\%$ \Gls{55cm}
+            \item $88,6\%$ \Gls{6dpose}
+            \item $97,5\&$ \Gls{2dproj}
+        \end{itemize*}
+        \item[Ressourcen] NVIDIA 1080 Ti GPU mit 2 Iterationen während der Tests
+        \item[Laufzeit] 12fps
     \end{description*}
 
     \subsection{MaskFusion}\cite{MaskFusion}
@@ -252,7 +277,7 @@
         \begin{tabular}{p{1.5cm}|p{2cm}|p{2cm}|p{2cm}|p{2cm}}
                                                   & ?                                      & Farbbild                & Tiefenbild                    & 3D Pointcloud \\\hline
             \multirow{3}{1.5cm}{3D Modell}        & RGF\cite{GaussianFilter}               & Contour Matching        &                               &               \\
-                                                  & dbotPF\cite{dbotPF}                    &                         &                               &               \\
+                                                  & dbotPF\cite{dbotPF}                    & DeepIM\cite{Deepim}     &                               &               \\
                                                   & se-TrackNet\cite{se-TrackNet}          &                         &                               &               \\\hline
             \multirow{3}{1.5cm}{Kategorie Modell} & NOCS\cite{NormalizedObjectCoordiante}  & Feature Matching        &                               &               \\
                                                   & KeypointNet\cite{KeypointNet}          &                         & 6-PACK\cite{6pack}            &               \\
