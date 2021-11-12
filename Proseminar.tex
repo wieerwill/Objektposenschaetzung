@@ -38,6 +38,10 @@
     name={KNN},
     description={Die Dynamik dieses Netzes gibt zu Beginn eine feste Architektur eines einschichtigen Netzes n-m vor. Das bedeutet, dass das Netz aus n Eingangsneuronen besteht, von denen jedes ein Eingang für alle m Ausgangsneuronen ist.}
 }
+\newglossaryentry{dnn}{
+    name={DNN},
+    description={Deep Neural Network: Ein tiefes neuronales Netz kann als gestapeltes neuronales Netz betrachtet werden, d.h. als Netz, das aus mehreren Schichten besteht.}
+}
 \newglossaryentry{cnn}{
     name={CNN},
     description={Convolutional Neural Network: Besitzt pro Convolutional Layer mehrere Filterkerne, sodass Schichten an Feature Maps entstehen, die jeweils die gleiche Eingabe bekommen, jedoch aufgrund unterschiedlicher Gewichtsmatrizen unterschiedliche Features extrahieren.}
@@ -190,7 +194,7 @@
         \item[Modell] 3D-CAD-Modell
         \item[Video-Input] RGB
         \item[Datensatz] \Gls{Linemod}, \Gls{Occlusion}
-        \item[Genauigkeit] \Gls{Linemod} -Datensatz:
+        \item[Genauigkeit] \Gls{Linemod}
         \begin{itemize*}
             \item $85,2\%$ \Gls{55cm}
             \item $88,6\%$ \Gls{6dpose}
@@ -212,7 +216,7 @@
         \item[Modell] mit Modell
         \item[Video-Input] RGB-D
         \item[Datensatz] \Gls{mscoco}
-        \item[Genauigkeit] \Gls{NOCS} Datensatz
+        \item[Genauigkeit] \Gls{NOCS}
         \begin{itemize*}
             \item $26,5\%$ \Gls{55cm}
             \item $64,9\%$ \Gls{IoU25}
@@ -228,12 +232,24 @@
         \item[Laufzeit] $20-30$Hz
     \end{description*}
 
-    \subsection{Neural Analysis-by-Synthesis}\cite{CategoryLevelObject}
+    \subsection{Neural Analysis-by-Synthesis}
+    Der neuronale Analyse-durch-Synthese-Ansatz \cite{CategoryLevelObject} ist zur Schätzung der Objektposition auf Kategorieebene.
+    %Sie kombinieren ein gradientenbasiertes Anpassungsverfahren mit einem parametrischen neuronalen Bildsynthesemodell, das in der Lage ist, implizit das Aussehen, die Form und die Pose ganzer Objektkategorien darzustellen, so dass zur Testzeit keine instanzspezifischen 3D-CAD-Modelle benötigt werden. 
+    Durch den Einsatz eines gelernten Bildsynthesemoduls ist dieser Ansatz in der Lage, die 3D-Pose eines Objekts aus einem einzigen RGB- oder RGB-D-Bild zu ermitteln, ohne dass ein Zugriff auf instanzspezifische 3D-CAD-Modelle erforderlich ist.
+    Der Kerngedanke der Analyse durch Synthese besteht darin, ein Vorwärtsmodell (z.B. eine Grafikpipeline) zu nutzen, um verschiedene Bilder zu erzeugen, die möglichen geometrischen und semantischen Zuständen der Umgebung entsprechen. Anschließend wird der Kandidat ausgewählt, der am besten mit der gemessenen visuellen Evidenz übereinstimmt.
+
+    Zunächst wird ein Pose-Aware-Bildgenerator mit Multi-View-Bildern von synthetischen Objekten aus dem ShapeNet-Datensatz trainiert, der in der Lage ist, Objektbilder zu erzeugen, die die Pose und Erscheinung des Eingabeobjekts genau wiedergeben. Zum Zeitpunkt der Inferenz mit einem segmentierten Bild als Eingabe schätzt die Methode die Objektpose durch iterative Optimierung der Objektpose und -form, um die Diskrepanz zwischen dem Eingabebild und dem synthetisierten Bild zu minimieren.
+
+    Der Schwerpunkt liegt auf starren Objekten.
     \begin{description*}
-        \item[Modell]
-        \item[Video-Input]
-        \item[Datensatz]
-        \item[Genauigkeit]
+        \item[Modell] ohne
+        \item[Video-Input] RBG und RGB-D
+        \item[Datensatz] ohne
+        \item[Genauigkeit] \Gls{NOCS}
+        \begin{itemize*}
+            \item ~95\% average translation precision
+            \item ~90\% average orientation precision
+        \end{itemize*}
         \item[Ressourcen]
         \item[Laufzeit]
     \end{description*}
@@ -247,7 +263,7 @@
         \item[Modell] Kategorie-bezogene 3D Modellen
         \item[Video-Input] RGB-D
         \item[Datensatz] \Gls{NOCS}, \Gls{ShapeNetCore}
-        \item[Genauigkeit] \Gls{NOCS} Datensatz:
+        \item[Genauigkeit] \Gls{NOCS}
         \begin{itemize*}
             \item $33,3\%$ \Gls{55cm}
             \item $94,2\%$ \Gls{IoU25}
@@ -282,26 +298,27 @@
         \item[Laufzeit]
     \end{description*}
 
-    \section{Vergleich verschiedener Verfahren}
-    Vergleich der unterschiedlichen Methoden unterscheidbar nach \colorbox{Mahogany}{Klassische}, \colorbox{YellowOrange}{RNN-basierte}, \colorbox{Cyan}{CNN-basierte}, \colorbox{OliveGreen}{GNN-basierte}
-
     \section{Fazit}
 
 \end{multicols*}
 
+\section{Vergleich verschiedener Verfahren}
+Vergleich der unterschiedlichen Methoden unterscheidbar nach \colorbox{Mahogany}{Klassische}, \colorbox{YellowOrange}{RNN-basierte}, \colorbox{Cyan}{CNN-basierte}, \colorbox{OliveGreen}{GNN-basierte}
+
 \begin{table}
     \centering
     \begin{tabular}{p{1.5cm}|l|l|l|l}
-                                              & ?                                      & Farbbild                & Tiefenbild                    & 3D Pointcloud \\\hline
-        \multirow{3}{1.5cm}{3D Modell}        & RGF\cite{GaussianFilter}               & Contour Matching        &                               &               \\
-                                              & dbotPF\cite{dbotPF}                    & DeepIM\cite{Deepim}     &                               &               \\
-                                              & se-TrackNet\cite{se-TrackNet}          &                         &                               &               \\\hline
-        \multirow{3}{1.5cm}{Kategorie Modell} & NOCS\cite{NormalizedObjectCoordiante}  & Feature Matching        &                               &               \\
-                                              & KeypointNet\cite{KeypointNet}          &                         & 6-PACK\cite{6pack}            &               \\
-                                              &                                        &                         &                               &               \\\hline
-        \multirow{3}{1.5cm}{ohne Modell}      & ICP\cite{ICP}, TEASER++\cite{Teaser++} & Iterative Closest Point & MaskFusion\cite{MaskFusion}   &               \\
-                                              &                                        &                         & PoseCNN\cite{PoseCNN}         &               \\
-                                              &                                        &                         & BundleTrack\cite{BundleTrack} &               \\
+                                              & ?                                     & Farbbild                                          & Tiefenbild                                        & 3D Pointcloud \\\hline
+        \multirow{3}{1.5cm}{3D Modell}        & RGF\cite{GaussianFilter}              & Contour Matching                                  &                                                   &               \\
+                                              & dbotPF\cite{dbotPF}                   & DeepIM\cite{Deepim}                               &                                                   &               \\
+                                              & se-TrackNet\cite{se-TrackNet}         &                                                   &                                                   &               \\\hline
+        \multirow{3}{1.5cm}{Kategorie Modell} & NOCS\cite{NormalizedObjectCoordiante} & Feature Matching                                  &                                                   &               \\
+                                              & KeypointNet\cite{KeypointNet}         &                                                   & 6-PACK\cite{6pack}                                &               \\
+                                              &                                       &                                                   &                                                   &               \\\hline
+        \multirow{3}{1.5cm}{ohne Modell}      & ICP\cite{ICP}                         & Iterative Closest Point                           & MaskFusion\cite{MaskFusion}                       &               \\
+                                              & TEASER++\cite{Teaser++}               & Analyse-durch-Synthese \cite{CategoryLevelObject} & Analyse-durch-Synthese \cite{CategoryLevelObject} &               \\
+                                              &                                       &                                                   & BundleTrack\cite{BundleTrack}                     &               \\
+                                              &                                       &                                                   & PoseCNN\cite{PoseCNN}                             &               \\
     \end{tabular}
     \caption{Übersicht unterschiedlicher Verfahren}
     \label{ubersicht}
