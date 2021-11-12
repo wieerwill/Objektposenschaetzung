@@ -7,7 +7,8 @@
 \usepackage[babel,german=quotes]{csquotes}
 \usepackage[left=1cm,top=1cm,right=1cm]{geometry}
 \usepackage{amsmath,amsthm,amsfonts,amssymb}
-\usepackage{color,graphicx,overpic}
+\usepackage{color,graphicx,overpic,multirow}
+\usepackage[dvipsnames]{xcolor}
 \usepackage{pdflscape}
 \usepackage{verbatim}
 \usepackage{mdwlist} %less space for lists
@@ -33,9 +34,21 @@
 \usepackage{glossaries}
 \setglossarystyle{list} 
 \makeglossaries
+\newglossaryentry{knn}{
+    name={KNN},
+    description={Die Dynamik dieses Netzes gibt zu Beginn eine feste Architektur eines einschichtigen Netzes n-m vor. Das bedeutet, dass das Netz aus n Eingangsneuronen besteht, von denen jedes ein Eingang für alle m Ausgangsneuronen ist.}
+}
 \newglossaryentry{cnn}{
-    name=Convolutional Neural Network,
-    description={Besitzt pro Convolutional Layer mehrere Filterkerne, sodass Schichten an Feature Maps entstehen, die jeweils die gleiche Eingabe bekommen, jedoch aufgrund unterschiedlicher Gewichtsmatrizen unterschiedliche Features extrahieren.}
+    name={CNN},
+    description={Convolutional Neural Network: Besitzt pro Convolutional Layer mehrere Filterkerne, sodass Schichten an Feature Maps entstehen, die jeweils die gleiche Eingabe bekommen, jedoch aufgrund unterschiedlicher Gewichtsmatrizen unterschiedliche Features extrahieren.}
+}
+\newglossaryentry{rnn}{
+    name={RNN},
+    description={Ein rekurrentes neuronales Netz ist eine Klasse von künstlichen neuronalen Netzen, bei denen die Verbindungen zwischen den Knoten einen gerichteten Graphen entlang einer zeitlichen Abfolge bilden. Dadurch können sie ein zeitlich dynamisches Verhalten zeigen.}
+}
+\newglossaryentry{gnn}{
+    name={GNN},
+    description={Graph Neural Network: ist eine Art von neuronalem Netz, das direkt auf der Struktur eines Graphen arbeitet. Eine typische Anwendung von GNN ist die Knotenklassifizierung. Im Wesentlichen ist jeder Knoten im Graphen mit einem Label verbunden, und wir wollen das Label der Knoten ohne Ground-Truth vorhersagen.}
 }
 \newglossaryentry{quaternion}{
     name={Quaternion-Darstellung},
@@ -43,11 +56,15 @@
     }
 \newglossaryentry{NOCS}{
     name={NOCS},
-    description={Der Datensatz enthält 6 Objektkategorien: Flasche, Schüssel, Kamera, Dose, Laptop und Becher. Der Trainingssatz besteht aus: 7 realen Videos mit insgesamt 3 Instanzen jeder Kategorie, die mit Grundwahrheits-Posen annotiert sind; und 275K Frames synthetischer Daten, die mit 1085 Instanzen aus den oben genannten 6 Kategorien unter Verwendung einer 3D-Modell-Datenbank ShapeNetCore mit zufälligen Posen und Objektkombinationen in jeder Szene erzeugt wurden. Der Testsatz besteht aus 6 realen Videos, die 3 verschiedene ungesehene Instanzen innerhalb jeder Kategorie enthalten, was zu 18 verschiedenen Objektinstanzen und insgesamt 3 Frames führt.}
+    description={Der Datensatz enthält 6 Objektkategorien: Flasche, Schüssel, Kamera, Dose, Laptop und Becher. Drei von diesen sind Kategorien mit symmetrischen Achsen.}
     }
+\newglossaryentry{ShapeNetCore}{
+    name={ShapeNetCore},
+    description={ShapeNetCore ist eine Teilmenge des vollständigen ShapeNet-Datensatzes mit einzelnen sauberen 3D-Modellen und manuell verifizierten Kategorie- und Ausrichtungsannotationen. Er umfasst 55 gängige Objektkategorien mit etwa 51.300 einzigartigen 3D-Modellen. Die 12 Objektkategorien von PASCAL 3D+, einem beliebten 3D-Benchmark-Datensatz für Computer Vision, werden alle von ShapeNetCore abgedeckt.}
+}
 \newglossaryentry{YCBInEOAT}{
     name={YCBInEOAT},
-    description={Dieser Datensatz hilft, die Effektivität der 6D-Positionsverfolgung während der Robotermanipulation zu überprüfen. Er wurde ursprünglich entwickelt, um Ansätze zu bewerten, die auf CAD-Modellen basieren. Im Gegensatz zum NOCS-Datensatz, bei dem die Objekte statisch auf einer Tischplatte platziert und von einer beweglichen Kamera erfasst werden, enthält YCBInEOAT 9 Videosequenzen, die von einer statischen RGB-D-Kamera aufgenommen wurden, während die Objekte dynamisch manipuliert werden. Es gibt drei Arten der Manipulation: (1) einarmiges Greifen und Platzieren, (2) Manipulation innerhalb der Hand und (3) Greifen und Übergeben zwischen den Armen zur Platzierung. Diese Szenarien und die verwendeten Endeffektoren machen die direkte Berechnung von posen aus Vorwärtskinematik unzuverlässig. Die Videos beinhalten 5 YCB Objekte: Senfglas, Tomatensuppendose, Zuckerbox, Bleichereiniger und eine Keksbox.}}
+    description={Dieser Datensatz hilft, die Effektivität der 6D-Positionsverfolgung während der Robotermanipulation zu überprüfen. Er enthält 9 Videosequenzen, die von einer statischen RGB-D-Kamera aufgenommen wurden, während die Objekte dynamisch manipuliert werden. Die Videos beinhalten 5 YCB Objekte: Glas, Dose, Zuckerbox, Bleichereiniger und Keksbox.}}
 \newglossaryentry{55cm}{
     name={5\textdegree 5cm},
     description={Prozentsatz der Schätzungen mit einem Orientierungsfehler $<5$\textdegree und einem Translationsfehler $< 5cm$ - je höher, desto besser}
@@ -185,11 +202,15 @@
         \item[Laufzeit]
     \end{description*}
 
-    \subsection{6-PACK}\cite{6pack}
+    \subsection{6-PACK}
+    6-PACK\cite{6pack} ist ein auf Bildverarbeitung basierender 6D-Posen Anker-basierter Kategorie-Level Keypoint Tracker. Dieser verfolgt einen kleinen Satz von Keypoints in RGB-D-Videos und schätzt die Objektpose durch Akkumulation der relativen Poseänderungen über die Zeit. Diese Methode erfordert kein bekanntes 3D-Modell. Stattdessen umgeht es die Notwendigkeit der Definition und Schätzung der absoluten 6D-Pose durch einen neuartigen Ankermechanismus, der der Vorschlagsmethodik für die 2D-Objekterkennung entspricht. Diese Anker bieten eine Grundlage für die Erzeugung von 3D-Keypoints.
+    Im Gegensatz zu früheren Methoden, die manuelle Keypoint-Anmerkungen erfordern, wird ein unüberwachten Lernansatz eingesetzt, der die optimale Menge an 3D-Keypoints für die Verfolgung ermittelt. Diese Keypoints dienen als kompakte Repräsentation des Objekts, aus der der Pose-Unterschied zwischen zwei benachbarten Frames effizient geschätzt werden kann. Diese Keypoint-basierte Darstellung führt zu einer robusten und Echtzeit-6D-Positionsverfolgung.
+    Darüber hinaus wurde 6-PACK auf einer HSR-Roboterplattform eingesetzt und gezeigt, dass die Methode Echtzeit-Tracking und Roboter-Interaktion ermöglicht.
+
     \begin{description*}
         \item[Modell] Kategorie-bezogene 3D Modellen
-        \item[Video-Input]
-        \item[Datensatz]
+        \item[Video-Input] RGB-D
+        \item[Datensatz] \Gls{NOCS}, \Gls{ShapeNetCore}
         \item[Genauigkeit] \Gls{NOCS} Datensatz:
         \begin{itemize*}
             \item $33,3\%$ \Gls{55cm}
@@ -197,13 +218,8 @@
             \item $16,0$ \Gls{Rerr}
             \item $3,5$ \Gls{Terr}
         \end{itemize*}
-        Ergebnisse aus \Gls{AUC} Messung
-        \begin{itemize*}
-            \item ADD $-\%$
-            \item ADD-S $-\%$
-        \end{itemize*}
-        \item[Ressourcen]
-        \item[Laufzeit]
+        \item[Ressourcen] getestet mit NVIDIA GTX1070 GPU und Intel Core i7-6700K CPU, verfolgt Posen mit 10 Hz mit weniger als 30\% des GPU-Speicherplatzes (etwa 2 GB)
+        \item[Laufzeit] $>10$fps real-time interaction
     \end{description*}
 
     \subsection{PoseCNN}\cite{PoseCNN}
@@ -231,6 +247,21 @@
     \end{description*}
 
     \section{Vergleich verschiedener Verfahren}
+    Vergleich der unterschiedlichen Methoden unterscheidbar nach \colorbox{Mahogany}{Klassische}, \colorbox{YellowOrange}{RNN-basierte}, \colorbox{Cyan}{CNN-basierte}, \colorbox{OliveGreen}{GNN-basierte}
+    \begin{center}
+        \begin{tabular}{p{1.5cm}|p{2cm}|p{2cm}|p{2cm}|p{2cm}}
+                                                  & ?                                      & Farbbild                & Tiefenbild                    & 3D Pointcloud \\\hline
+            \multirow{3}{1.5cm}{3D Modell}        & RGF\cite{GaussianFilter}               & Contour Matching        &                               &               \\
+                                                  & dbotPF\cite{dbotPF}                    &                         &                               &               \\
+                                                  & se-TrackNet\cite{se-TrackNet}          &                         &                               &               \\\hline
+            \multirow{3}{1.5cm}{Kategorie Modell} & NOCS\cite{NormalizedObjectCoordiante}  & Feature Matching        &                               &               \\
+                                                  & KeypointNet\cite{KeypointNet}          &                         & 6-PACK\cite{6pack}            &               \\
+                                                  &                                        &                         &                               &               \\\hline
+            \multirow{3}{1.5cm}{ohne Modell}      & ICP\cite{ICP}, TEASER++\cite{Teaser++} & Iterative Closest Point &                               &               \\
+                                                  & MaskFusion\cite{MaskFusion}            &                         & PoseCNN\cite{PoseCNN}         &               \\
+                                                  &                                        &                         & BundleTrack\cite{BundleTrack} &               \\
+        \end{tabular}
+    \end{center}
 
     \section{Fazit}
 
