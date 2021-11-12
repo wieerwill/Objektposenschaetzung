@@ -75,12 +75,16 @@
     description={LINEMOD ist ein RGB+D-Datensatz, der sich zu einem De-facto-Standard-Benchmark für 6D-Positionsschätzungen entwickelt hat. Der Datensatz enthält schlecht texturierte Objekte in einer unübersichtlichen Szene. 15 texturlose Haushaltsgegenstände mit Farbe, Form und Größe. Jedem Objekt ist ein Testbild zugeordnet, das eine kommentierte Objektinstanz mit erheblicher Unordnung, aber nur leichter Verdeckung zeigt.}
 }
 \newglossaryentry{Occlusion}{
-    name={LINEMOD Occlusion},
+    name={LM-Occlusion},
     description={Bietet zusätzliche Ground-Truth-Annotationen für alle modellierten Objekte in einer der Testgruppen von LIMEMOD. Dies führt anspruchsvolle Testfälle mit verschiedenen Verdeckungsgraden ein. Die Trainingsbilder sind die gleichen wie die für LIMEMOD.}
 }
 \newglossaryentry{mscoco}{
     name={MS-COCO},
     description={Microsoft Common Objects in Context ist ein groß angelegter Datensatz für Objekterkennung, Segmentierung, Key-Point-Erkennung und Beschriftung. Der Datensatz besteht aus 328K Bildern.}
+}
+\newglossaryentry{ycb}{
+    name={YCB-Video},
+    description={80 Videos zum Training mit 2.949 Schlüsselbildern, die aus den restlichen 12 Testvideos extrahiert wurden.}
 }
 \newglossaryentry{55cm}{
     name={5\textdegree 5cm},
@@ -274,19 +278,36 @@
         \item[Laufzeit] $>10$fps real-time interaction
     \end{description*}
 
-    \subsection{PoseCNN}\cite{PoseCNN}
+    \subsection{PoseCNN}
+    Ein neues \Gls{cnn} für die 6D-Objektposenschätzung. PoseCNN\cite{PoseCNN} entkoppelt die Schätzung von 3D-Rotation und 3D-Translation. Es schätzt die 3D-Verschiebung eines Objekts, indem es sein Zentrum im Bild lokalisiert und seinen Abstand zur Kamera vorhersagt. Durch Regression jedes Pixels auf einen Einheitsvektor in Richtung des Objektzentrums kann das Zentrum unabhängig vom Maßstab robust geschätzt werden. Noch wichtiger ist, dass die Pixel das Objektzentrum auch dann wählen, wenn es von anderen Objekten verdeckt wird.
+    Die 3D-Rotation des Objekts wird durch Regression auf eine \Gls{quaternion}-Darstellung  geschätzt. Es werden zwei neue Verlustfunktionen für die Rotationsschätzung eingeführt, wobei der ShapeMatch-Verlust für symmetrische Objekte entwickelt wurde.
+    Dadurch ist PoseCNN in der Lage, Okklusion und symmetrische Objekte in unübersichtlichen Szenen zu verarbeiten. Dies eröffnet den Weg zur Verwendung von Kameras mit einer Auflösung und einem Sichtfeld, die weit über die derzeit verwendeten Tiefenkamerasysteme hinausgehen.
+    Manchmal führt SLOSS zu lokalen Minimums im Pose-Raum führt, ähnlich wie ICP.
+
+    Die Methode erreicht Ende-zu-Ende 6D Posenschätzung und ist sehr robust gegenüber Verdeckungen zwischen Objekten.
     \begin{description*}
-        \item[Modell]
-        \item[Video-Input]
-        \item[Datensatz]
-        \item[Genauigkeit]
+        \item[Modell] ohne
+        \item[Video-Input] RGB, RGB-D
+        \item[Datensatz] \Gls{ycb}, \Gls{Linemod}, \Gls{Occlusion}
+        \item[Genauigkeit] Ergebnisse aus \Gls{AUC} Messung bei RGB
+        \begin{itemize*}
+            \item ADD $53,7\%$
+            \item ADD-S $75,9\%$
+        \end{itemize*}
+        Ergebnisse aus \Gls{AUC} Messung bei RGB-D mit ICP
+        \begin{itemize*}
+            \item ADD $79,3\%$
+            \item ADD-S $93,0\%$
+        \end{itemize*}
+        Ergebnisse aus \Gls{Occlusion}
+        \begin{itemize*}
+            \item PoseCNN Color $24,9\%$
+            \item PoseCNN+ICP $78,0\%$
+        \end{itemize*}
         \item[Ressourcen]
         \item[Laufzeit]
     \end{description*}
 
-    Ein neues \Gls{cnn} für die 6D-Objektposenschätzung. PoseCNN schätzt die 3D-Verschiebung eines Objekts, indem es sein Zentrum im Bild lokalisiert und seinen Abstand zur Kamera vorhersagt. Die 3D-Rotation des Objekts wird durch Regression auf eine \Gls{quaternion} geschätzt. Dabei führt man eine neue Verlustfunktion ein, die es PoseCNN ermöglicht, symmetrische Objekte zu behandeln. Erreicht Ende-zu-Ende 6D Posenschätzung und ist sehr robust gegenüber Verdeckungen zwischen Objekten.
-
-    PoseCNN entkoppelt die Schätzung von 3D-Rotation und 3D-Translation. Es schätzt die 3D-Verschiebung durch Lokalisierung des Objektzentrums und Vorhersage des Zentrumsabstands. Durch Regression jedes Pixels auf einen Einheitsvektor in Richtung des Objektzentrums kann das Zentrum unabhängig vom Maßstab robust geschätzt werden. Noch wichtiger ist, dass die Pixel das Objektzentrum auch dann wählen, wenn es von anderen Objekten verdeckt wird. Die 3D-Drehung wird durch Regression auf eine Quaternion-Darstellung vorhergesagt. Es werden zwei neue Verlustfunktionen für die Rotationsschätzung eingeführt, wobei der ShapeMatch-Verlust für symmetrische Objekte entwickelt wurde. Dadurch ist PoseCNN in der Lage, Okklusion und symmetrische Objekte in unübersichtlichen Szenen zu verarbeiten. Dies eröffnet den Weg zur Verwendung von Kameras mit einer Auflösung und einem Sichtfeld, die weit über die derzeit verwendeten Tiefenkamerasysteme hinausgehen. Wir stellen fest, dass SLOSS manchmal zu lokalen Minimums im Pose-Raum führt, ähnlich wie ICP. Es wäre interessant, in Zukunft einen effizienteren Umgang mit symmetrischen Objekten in der 6D-Positionsschätzung zu erforschen.
 
     \subsection{Robust Gaussian Filter}\cite{GaussianFilter}
     \begin{description*}
@@ -304,11 +325,10 @@
 
 \section{Vergleich verschiedener Verfahren}
 Vergleich der unterschiedlichen Methoden unterscheidbar nach \colorbox{Mahogany}{Klassische}, \colorbox{YellowOrange}{RNN-basierte}, \colorbox{Cyan}{CNN-basierte}, \colorbox{OliveGreen}{GNN-basierte}
-
 \begin{table}
     \centering
     \begin{tabular}{p{1.5cm}|l|l|l|l}
-                                              & ?                                     & Farbbild                                          & Tiefenbild                                        & 3D Pointcloud \\\hline
+        benötigen                             & ?                                     & Farbbild                                          & Tiefenbild                                        & 3D Pointcloud \\\hline
         \multirow{3}{1.5cm}{3D Modell}        & RGF\cite{GaussianFilter}              & Contour Matching                                  &                                                   &               \\
                                               & dbotPF\cite{dbotPF}                   & DeepIM\cite{Deepim}                               &                                                   &               \\
                                               & se-TrackNet\cite{se-TrackNet}         &                                                   &                                                   &               \\\hline
