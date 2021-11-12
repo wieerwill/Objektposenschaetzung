@@ -74,6 +74,10 @@
     name={LINEMOD Occlusion},
     description={Bietet zusätzliche Ground-Truth-Annotationen für alle modellierten Objekte in einer der Testgruppen von LIMEMOD. Dies führt anspruchsvolle Testfälle mit verschiedenen Verdeckungsgraden ein. Die Trainingsbilder sind die gleichen wie die für LIMEMOD.}
 }
+\newglossaryentry{mscoco}{
+    name={MS-COCO},
+    description={Microsoft Common Objects in Context ist ein groß angelegter Datensatz für Objekterkennung, Segmentierung, Key-Point-Erkennung und Beschriftung. Der Datensatz besteht aus 328K Bildern.}
+}
 \newglossaryentry{55cm}{
     name={5\textdegree 5cm},
     description={Prozentsatz der Schätzungen mit einem Orientierungsfehler $<5$\textdegree und einem Translationsfehler $< 5cm$ - je höher, desto besser}
@@ -196,12 +200,19 @@
         \item[Laufzeit] 12fps
     \end{description*}
 
-    \subsection{MaskFusion}\cite{MaskFusion}
+    \subsection{MaskFusion}
+    MaskFusion\cite{MaskFusion} ist ein objektbewusstes, semantisches und dynamisches RGB-D SLAM-System in Echtzeit, das über traditionelle Systeme hinausgeht, die eine rein geometrische Karte einer statischen Szene ausgeben. MaskFusion erkennt, segmentiert und ordnet verschiedenen Objekten in der Szene semantische Klassenlabels zu, während es sie verfolgt und rekonstruiert, selbst wenn sie sich unabhängig von der Kamera bewegen.
+    Während eine RGB-D-Kamera eine unübersichtliche Szene abtastet, erzeugt die bildbasierte semantische Segmentierung auf Instanzebene semantische Objektmasken, die eine Objekterkennung in Echtzeit und die Erstellung einer Darstellung auf Objektebene für die Weltkarte ermöglichen. Im Gegensatz zu früheren, auf Erkennung basierenden SLAM-Systemen benötigt MaskFusion keine bekannten Modelle der Objekte, die es erkennen kann, und kann mit mehreren unabhängigen Bewegungen umgehen. MaskFusion nutzt die Vorteile der semantischen Segmentierung auf Instanzebene, um semantische Beschriftungen in eine objektbezogene Karte zu integrieren, im Gegensatz zu neueren semantischen SLAM-Systemen, die eine semantische Segmentierung auf Voxel-Ebene durchführen.
+
+    MaskFusion ermöglicht dichtes dynamisches RGBD-SLAM in Echtzeit auf Ebene von Objekten. Im Wesentlichen ist MaskFusion ein Multi-Modell-SLAM System, das für jedes Objekt, das es in der Szene erkennt, eine 3D-Darstellung verwaltet das es in der Szene erkennt (zusätzlich zum Hintergrundmodell). Jedes Modell wird unabhängig verfolgt und fusioniert.
+
+    Was die Erkennung betrifft, so kann MaskFusion nur Objekte aus Klassen erkennen, auf die die MaskRCNN trainiert wurde (derzeit die 80 Klassen des \Gls{mscoco}-Datensatzes) und berücksichtigt keine Fehlklassifizierung von Objektbeschriftungen.
+
     \begin{description*}
-        \item[Modell] ohne Modell
-        \item[Video-Input]
-        \item[Datensatz]
-        \item[Genauigkeit] NOCS Datensatz
+        \item[Modell] mit Modell
+        \item[Video-Input] RGB-D
+        \item[Datensatz] \Gls{mscoco}
+        \item[Genauigkeit] \Gls{NOCS} Datensatz
         \begin{itemize*}
             \item $26,5\%$ \Gls{55cm}
             \item $64,9\%$ \Gls{IoU25}
@@ -213,8 +224,8 @@
             \item ADD $35,07\%$
             \item ADD-S $41,88\%$
         \end{itemize*}
-        \item[Ressourcen]
-        \item[Laufzeit]
+        \item[Ressourcen] Die Faltungsmaskierung läuft asynchron zum Rest von MaskFusion und erfordert eine spezielle GPU. Sie arbeitet mit 5Hz, und da sie den Grafikprozessor über lange Zeiträume blockiert, wird  ein anderen Grafikprozessor für die SLAM-Pipeline verwendet, der mit $>30$Hz arbeitet, wenn ein einzelnes Modell verfolgt wird. Bei Vorhandensein mehrerer nicht-statischer Objekten sinkt die Leistung und führt zu einer Bildwiederholrate von 20 Hz für 3 Modelle. Das Testsystem ist mit zwei Nvidia GTX Titan X und einem Intel Core i7, 3.5GHz auzsgestattet.
+        \item[Laufzeit] $20-30$Hz
     \end{description*}
 
     \subsection{Neural Analysis-by-Synthesis}\cite{CategoryLevelObject}
@@ -261,7 +272,7 @@
 
     PoseCNN entkoppelt die Schätzung von 3D-Rotation und 3D-Translation. Es schätzt die 3D-Verschiebung durch Lokalisierung des Objektzentrums und Vorhersage des Zentrumsabstands. Durch Regression jedes Pixels auf einen Einheitsvektor in Richtung des Objektzentrums kann das Zentrum unabhängig vom Maßstab robust geschätzt werden. Noch wichtiger ist, dass die Pixel das Objektzentrum auch dann wählen, wenn es von anderen Objekten verdeckt wird. Die 3D-Drehung wird durch Regression auf eine Quaternion-Darstellung vorhergesagt. Es werden zwei neue Verlustfunktionen für die Rotationsschätzung eingeführt, wobei der ShapeMatch-Verlust für symmetrische Objekte entwickelt wurde. Dadurch ist PoseCNN in der Lage, Okklusion und symmetrische Objekte in unübersichtlichen Szenen zu verarbeiten. Dies eröffnet den Weg zur Verwendung von Kameras mit einer Auflösung und einem Sichtfeld, die weit über die derzeit verwendeten Tiefenkamerasysteme hinausgehen. Wir stellen fest, dass SLOSS manchmal zu lokalen Minimums im Pose-Raum führt, ähnlich wie ICP. Es wäre interessant, in Zukunft einen effizienteren Umgang mit symmetrischen Objekten in der 6D-Positionsschätzung zu erforschen.
 
-    \subsection{Robust Gaussian Filter\cite{GaussianFilter}}
+    \subsection{Robust Gaussian Filter}\cite{GaussianFilter}
     \begin{description*}
         \item[Modell]
         \item[Video-Input]
@@ -273,24 +284,28 @@
 
     \section{Vergleich verschiedener Verfahren}
     Vergleich der unterschiedlichen Methoden unterscheidbar nach \colorbox{Mahogany}{Klassische}, \colorbox{YellowOrange}{RNN-basierte}, \colorbox{Cyan}{CNN-basierte}, \colorbox{OliveGreen}{GNN-basierte}
-    \begin{center}
-        \begin{tabular}{p{1.5cm}|p{2cm}|p{2cm}|p{2cm}|p{2cm}}
-                                                  & ?                                      & Farbbild                & Tiefenbild                    & 3D Pointcloud \\\hline
-            \multirow{3}{1.5cm}{3D Modell}        & RGF\cite{GaussianFilter}               & Contour Matching        &                               &               \\
-                                                  & dbotPF\cite{dbotPF}                    & DeepIM\cite{Deepim}     &                               &               \\
-                                                  & se-TrackNet\cite{se-TrackNet}          &                         &                               &               \\\hline
-            \multirow{3}{1.5cm}{Kategorie Modell} & NOCS\cite{NormalizedObjectCoordiante}  & Feature Matching        &                               &               \\
-                                                  & KeypointNet\cite{KeypointNet}          &                         & 6-PACK\cite{6pack}            &               \\
-                                                  &                                        &                         &                               &               \\\hline
-            \multirow{3}{1.5cm}{ohne Modell}      & ICP\cite{ICP}, TEASER++\cite{Teaser++} & Iterative Closest Point &                               &               \\
-                                                  & MaskFusion\cite{MaskFusion}            &                         & PoseCNN\cite{PoseCNN}         &               \\
-                                                  &                                        &                         & BundleTrack\cite{BundleTrack} &               \\
-        \end{tabular}
-    \end{center}
 
     \section{Fazit}
 
 \end{multicols*}
+
+\begin{table}
+    \centering
+    \begin{tabular}{p{1.5cm}|l|l|l|l}
+                                              & ?                                      & Farbbild                & Tiefenbild                    & 3D Pointcloud \\\hline
+        \multirow{3}{1.5cm}{3D Modell}        & RGF\cite{GaussianFilter}               & Contour Matching        &                               &               \\
+                                              & dbotPF\cite{dbotPF}                    & DeepIM\cite{Deepim}     &                               &               \\
+                                              & se-TrackNet\cite{se-TrackNet}          &                         &                               &               \\\hline
+        \multirow{3}{1.5cm}{Kategorie Modell} & NOCS\cite{NormalizedObjectCoordiante}  & Feature Matching        &                               &               \\
+                                              & KeypointNet\cite{KeypointNet}          &                         & 6-PACK\cite{6pack}            &               \\
+                                              &                                        &                         &                               &               \\\hline
+        \multirow{3}{1.5cm}{ohne Modell}      & ICP\cite{ICP}, TEASER++\cite{Teaser++} & Iterative Closest Point & MaskFusion\cite{MaskFusion}   &               \\
+                                              &                                        &                         & PoseCNN\cite{PoseCNN}         &               \\
+                                              &                                        &                         & BundleTrack\cite{BundleTrack} &               \\
+    \end{tabular}
+    \caption{Übersicht unterschiedlicher Verfahren}
+    \label{ubersicht}
+\end{table}
 
 \medskip
 
