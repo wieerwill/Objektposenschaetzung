@@ -86,6 +86,10 @@
     name={YCB-Video},
     description={80 Videos zum Training mit 2.949 Schlüsselbildern, die aus den restlichen 12 Testvideos extrahiert wurden.}
 }
+\newglossaryentry{bot}{
+    name={Bayesian Object Tracking},
+    description={37 aufgezeichnete Sequenzen von Tiefenbildern. Jede Sequenz ist ca. zwei Minuten lang und zeigt eines von sechs Objekten mit und ohne Teilverdeckung, die mit unterschiedlichen Geschwindigkeiten bewegt werden. Um die Verfolgungsleistung bei verschiedenen Geschwindigkeiten zu bewerten, enthält der Datensatz Sequenzen mit drei Geschwindigkeitskategorien. Der Abstand zwischen Kamera und Objekt liegt zwischen 0,8 m und 1,1 m. \cite{bot}}
+}
 \newglossaryentry{55cm}{
     name={5\textdegree 5cm},
     description={Prozentsatz der Schätzungen mit einem Orientierungsfehler $<5$\textdegree und einem Translationsfehler $< 5cm$ - je höher, desto besser}
@@ -282,7 +286,7 @@
     Ein neues \Gls{cnn} für die 6D-Objektposenschätzung. PoseCNN\cite{PoseCNN} entkoppelt die Schätzung von 3D-Rotation und 3D-Translation. Es schätzt die 3D-Verschiebung eines Objekts, indem es sein Zentrum im Bild lokalisiert und seinen Abstand zur Kamera vorhersagt. Durch Regression jedes Pixels auf einen Einheitsvektor in Richtung des Objektzentrums kann das Zentrum unabhängig vom Maßstab robust geschätzt werden. Noch wichtiger ist, dass die Pixel das Objektzentrum auch dann wählen, wenn es von anderen Objekten verdeckt wird.
     Die 3D-Rotation des Objekts wird durch Regression auf eine \Gls{quaternion}-Darstellung  geschätzt. Es werden zwei neue Verlustfunktionen für die Rotationsschätzung eingeführt, wobei der ShapeMatch-Verlust für symmetrische Objekte entwickelt wurde.
     Dadurch ist PoseCNN in der Lage, Okklusion und symmetrische Objekte in unübersichtlichen Szenen zu verarbeiten. Dies eröffnet den Weg zur Verwendung von Kameras mit einer Auflösung und einem Sichtfeld, die weit über die derzeit verwendeten Tiefenkamerasysteme hinausgehen.
-    Manchmal führt SLOSS zu lokalen Minimums im Pose-Raum führt, ähnlich wie ICP.
+    Manchmal führt SLOSS zu lokalen Minimums im Pose-Raum führt, ähnlich wie ICP\cite{ICP}.
 
     Die Methode erreicht Ende-zu-Ende 6D Posenschätzung und ist sehr robust gegenüber Verdeckungen zwischen Objekten.
     \begin{description*}
@@ -309,14 +313,26 @@
     \end{description*}
 
 
-    \subsection{Robust Gaussian Filter}\cite{GaussianFilter}
+    \subsection{Robust Gaussian Filter}
+    Modellbasierte 3D-Verfolgung von Objekten bei dichten Tiefenbildern als Eingabe mithilfe Robuster Gauss Filter\cite{GaussianFilter}.
+    Zwei Schwierigkeiten schließen die Anwendung eines Standard-Gauß-Filters auf dieses Problem aus. Tiefensensoren sind von Messrauschen gekennzeichnet und werden durch eine Robustifizierungsmethode für Gaußfilter behoben. Dadurch wird eine heuristische Ausreißer-Erkennungsmethode verwendet, die einfache Messungen ablehnt, wenn sie nicht mit dem Modell übereinstimmen.
+    Daneben sind die Rechenkosten des Standard-Gauß-Filters aufgrund der hochdimensionalen Messung unerschwinglich. Um dieses Problem zu lösen wird eine Annäherung verwendet um die Rechenkomplexität des Filters zu reduzieren.
+    In quantitativen Experimenten mit realen Daten wurde gezeigt, dass diese Methode besser abschneidet als der Standard-Gauß-Filter. Außerdem mit einer auf Partikelfiltern basierenden Verfolgungsmethode bei vergleichbarer Recheneffizienz eine verbesserte Genauigkeit und Glattheit der Schätzungen erzielt.
+    Die Methode zur Verfolgung der 6-Grad Freiheitsgrades und der Geschwindigkeit eines Objekts mit Tiefenmessungen nutzt eine Standard-Tiefenkamera. Der vorgeschlagene Algorithmus läuft mit der Bildrate der Kamera von 30 Hz auf nur einem CPU-Kern.
+
     \begin{description*}
-        \item[Modell]
-        \item[Video-Input]
-        \item[Datensatz]
+        \item[Modell] CAD-Modell
+        \item[Video-Input] RGB-D
+        \item[Datensatz] \Gls{bot}
         \item[Genauigkeit]
-        \item[Ressourcen]
-        \item[Laufzeit]
+        \begin{itemize*}
+            \item Verschiebungsfehler Mittelwert $0,03008$[mm]
+            \item Verschiebungsfehler Median $0,00489$[mm]
+            \item Winkelfehler Mittelwert $0,39644$[Grad]
+            \item Winkelfehler Median $0,06076$[Grad]
+        \end{itemize*}
+        \item[Ressourcen] 640×480 Pixel auf einem CPU-Kern
+        \item[Laufzeit] 30Hz
     \end{description*}
 
     \section{Fazit}
@@ -328,17 +344,17 @@ Vergleich der unterschiedlichen Methoden unterscheidbar nach \colorbox{Mahogany}
 \begin{table}
     \centering
     \begin{tabular}{p{1.5cm}|l|l|l|l}
-        benötigen                             & ?                                     & Farbbild                                          & Tiefenbild                                        & 3D Pointcloud \\\hline
-        \multirow{3}{1.5cm}{3D Modell}        & RGF\cite{GaussianFilter}              & Contour Matching                                  &                                                   &               \\
-                                              & dbotPF\cite{dbotPF}                   & DeepIM\cite{Deepim}                               &                                                   &               \\
-                                              & se-TrackNet\cite{se-TrackNet}         &                                                   &                                                   &               \\\hline
-        \multirow{3}{1.5cm}{Kategorie Modell} & NOCS\cite{NormalizedObjectCoordiante} & Feature Matching                                  &                                                   &               \\
-                                              & KeypointNet\cite{KeypointNet}         &                                                   & 6-PACK\cite{6pack}                                &               \\
-                                              &                                       &                                                   &                                                   &               \\\hline
-        \multirow{3}{1.5cm}{ohne Modell}      & ICP\cite{ICP}                         & Iterative Closest Point                           & MaskFusion\cite{MaskFusion}                       &               \\
-                                              & TEASER++\cite{Teaser++}               & Analyse-durch-Synthese \cite{CategoryLevelObject} & Analyse-durch-Synthese \cite{CategoryLevelObject} &               \\
-                                              &                                       &                                                   & BundleTrack\cite{BundleTrack}                     &               \\
-                                              &                                       &                                                   & PoseCNN\cite{PoseCNN}                             &               \\
+        benötigen                             & ?                                     & Farbbild                                          & Tiefenbild                                        & 3D Pointcloud                               \\\hline
+        \multirow{3}{1.5cm}{3D Modell}        & RGF\cite{GaussianFilter}              & Contour Matching                                  &                                                   & Robust Gaussian Filter\cite{GaussianFilter} \\
+                                              & dbotPF\cite{dbotPF}                   & DeepIM\cite{Deepim}                               &                                                   &                                             \\
+                                              & se-TrackNet\cite{se-TrackNet}         &                                                   &                                                   &                                             \\\hline
+        \multirow{3}{1.5cm}{Kategorie Modell} & NOCS\cite{NormalizedObjectCoordiante} & Feature Matching                                  &                                                   &                                             \\
+                                              & KeypointNet\cite{KeypointNet}         &                                                   & 6-PACK\cite{6pack}                                &                                             \\
+                                              &                                       &                                                   &                                                   &                                             \\\hline
+        \multirow{3}{1.5cm}{ohne Modell}      & ICP\cite{ICP}                         & Iterative Closest Point                           & MaskFusion\cite{MaskFusion}                       &                                             \\
+                                              & TEASER++\cite{Teaser++}               & Analyse-durch-Synthese \cite{CategoryLevelObject} & Analyse-durch-Synthese \cite{CategoryLevelObject} &                                             \\
+                                              &                                       &                                                   & BundleTrack\cite{BundleTrack}                     &                                             \\
+                                              &                                       & PoseCNN\cite{PoseCNN}                             & PoseCNN\cite{PoseCNN}+ICP\cite{ICP}               &                                             \\
     \end{tabular}
     \caption{Übersicht unterschiedlicher Verfahren}
     \label{ubersicht}
