@@ -401,17 +401,20 @@
     \end{description*}
 
     \subsection{dbotPF}
+    Die dbotPF\cite{dbotPF} Methode verwendet ein dynamisches Bayesisches Netzwerk, um die Inferenz durchzuführen und eine posteriore Verteilung über die aktuelle Objektposition zu berechnen.
+    Die Bewegung eines Objekts wird als stochastischer Prozess betrachtet und in einem dynamischen Bayesischen Netzwerk modelliert. Inferenzen in diesem Netzwerk werden durchgeführt, um eine posteriore Verteilung über die aktuelle Objektposition zu berechnen.
+    Mit dem allgemeinen Paradigma eines Bayes-Filters, bei dem (i) die aktuelle Objektpose anhand der vorherigen Pose vorhergesagt und dann (ii) die Vorhersage anhand einer Beobachtung aktualisiert wird, gleichen sich Vorhersage und Beobachtung an.
+    Für den ersten Schritt wird ein Prozessmodell verwendet, das entweder von Steuereingaben abhängt (falls der Roboter das Objekt bewegt) oder auf der einfachen Annahme beruht, dass sich die Objektposition in kurzer Zeit nicht wesentlich ändert (falls das Objekt nicht vom Roboter gehalten wird).
+    Für den Aktualisierungsschritt gibt es ein Beobachtungsmodell, das anhand der aktuellen Schätzung der Objektposition die Wahrscheinlichkeit der beobachteten Tiefendaten bestimmt. Selbstverschlüsse und Verdeckungen durch die Umgebung werden explizit modelliert. Dadurch wird der Algorithmus robuster gegenüber diesen Effekten.
+    Allerdings ist das Beobachtungsmodell stark nichtlinear und es werden neue Abhängigkeiten in das Bayes-Netzwerk Netzwerk eingeführt. Daher wird eine Rao-Blackwell-Partikelfilter\cite{blackwellised} verwendet zur Berechnung einer Posterior-Verteilung über die aktuelle Objektlage.
 
     \begin{description*}
-        \item[Modell]
-        \item[Video-Input]
+        \item[Modell] 3D Modell
+        \item[Video-Input] RBG-D
         \item[Datensatz]
         \item[Genauigkeit]
-        \begin{itemize*}
-            \item
-        \end{itemize*}
-        \item[Ressourcen]
-        \item[Laufzeit]
+        \item[Ressourcen] Experimente auf einzelnem 3.3GHz Intel Xeon W5590 CPU-Kern
+        \item[Laufzeit] 200 Posen pro Kamerabild bei 30Hz Bildrate
     \end{description*}
 
     \subsection{ICP}
@@ -468,7 +471,7 @@ Vergleich der unterschiedlichen Methoden unterscheidbar nach \colorbox{Mahogany}
     \begin{tabular}{p{1.5cm}|l|l|l|l}
         benötigen                             & ?                                     & Farbbild                                          & Tiefenbild                                        & 3D Pointcloud                               \\\hline
         \multirow{3}{1.5cm}{3D Modell}        &                                       & Contour Matching                                  & se-TrackNet\cite{se-TrackNet}                     & Robust Gaussian Filter\cite{GaussianFilter} \\
-                                              & dbotPF\cite{dbotPF}                   & DeepIM\cite{Deepim}                               &                                                   &                                             \\
+                                              &                                       & DeepIM\cite{Deepim}                               & dbotPF\cite{dbotPF}                               &                                             \\
                                               &                                       &                                                   &                                                   &                                             \\\hline
         \multirow{3}{1.5cm}{Kategorie Modell} & NOCS\cite{NormalizedObjectCoordiante} & Feature Matching                                  &                                                   &                                             \\
                                               & KeypointNet\cite{KeypointNet}         &                                                   & 6-PACK\cite{6pack}                                &                                             \\
