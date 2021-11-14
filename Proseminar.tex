@@ -116,8 +116,7 @@
 }
 \newglossaryentry{IoU25}{
     name={IoU25},
-    description={(Intersection over Union) Prozentualer Anteil der Fälle, in denen die Überschneidung von Vorhersage und 3D Bounding Box größer ist als 25\% ihrer Vereinigung - je höher, desto besser
-    besser}
+    description={(Intersection over Union) Prozentualer Anteil der Fälle, in denen die Überschneidung von Vorhersage und 3D Bounding Box größer ist als 25\% ihrer Vereinigung - je höher, desto besser besser. IoU50 geht nach einen prozentualen Anteil von 50\%.}
 }
 \newglossaryentry{6dpose}{
     name={6D Pose},
@@ -133,7 +132,7 @@
 }
 \newglossaryentry{Terr}{
     name={T\_err},%T_{err}
-    description={mittlerer Übersetzungsfehler in Zentimetern - je niedriger, desto besser}
+    description={mittlerer Transformationsfehler in Zentimetern - je niedriger, desto besser}
 }
 \newglossaryentry{AUC}{
     name={AUC},
@@ -464,17 +463,25 @@
     \end{description*}
 
     \subsection{NOCS}
+    Normalized Object Coordinate Space (NOCS))\cite{NormalizedObjectCoordiante} schätzt 6D-Posen und Dimensionen von ungesehenen Objektinstanzen in einem RGB-D-Bild. Im Gegensatz zu 6D-Positionsschätzungsaufgaben auf Instanzebene geht NOCS davon aus, dass keine exakten Objekt-CAD-Modelle während der Trainings- oder Testzeit verfügbar sind. Um unterschiedliche und ungesehene Objektinstanzen in einer bestimmten Kategorie zu behandeln, wird eine gemeinsame kanonische Darstellung für alle möglichen Objektinstanzen innerhalb einer Kategorie verwendet. Das regionenbasiertes neuronales Netzwerk wird so trainiert, dass es die Korrespondenz von beobachteten Pixeln zu dieser gemeinsamen Objektdarstellung (NOCS) zusammen mit anderen Objektinformationen wie Klassenbezeichnung und Instanzmaske direkt ableitet. Diese Vorhersagen kann mit Tiefenkarten kombiniert werden, um gemeinsam die metrische 6D-Position und die Abmessungen mehrerer Objekte in einer unübersichtlichen Szene zu schätzen.
+    Um das Netzwerk zu trainieren, wird eine kontextbewusste Technik vorgestellt, um große Mengen an vollständig kommentierten Mixed-Reality-Daten zu erzeugen. Um das Modell weiter zu verbessern und seine Leistung auf realen Daten zu evaluieren, wurde auch ein vollständig annotierter realer Datensatz mit großer Umgebungs- und Instanzvariation zur Verfügung gestellt.
+    Experimente zeigen, dass diese Methode in der Lage ist, die Pose und Größe von ungesehenen Objektinstanzen in realen Umgebungen robust zu schätzen, während auch State-of-the-Art-Leistung auf Standard 6D Posenschätzungs Benchmarks erreicht werden.
 
     \begin{description*}
-        \item[Modell]
-        \item[Video-Input]
-        \item[Datensatz]
+        \item[Modell] Kategorie Modelle
+        \item[Video-Input] RGB-D
+        \item[Datensatz] \Gls{ShapeNetCore}
         \item[Genauigkeit]
         \begin{itemize*}
+            \item $13,9\%$ \Gls{55cm}
+            \item $33,5\%$ 10\textdegree 5cm
+            \item $79,6$ \Gls{IoU25}
+            \item $88,4\%$ IoU50
+            \item Entdeckungsrate von $94,7\%$
             \item
         \end{itemize*}
         \item[Ressourcen]
-        \item[Laufzeit]
+        \item[Laufzeit] 2 fps
     \end{description*}
 
 
@@ -482,24 +489,22 @@
 
 \end{multicols*}
 
-\section{Vergleich verschiedener Verfahren}
-Vergleich der unterschiedlichen Methoden unterscheidbar nach \colorbox{Mahogany}{Klassische}, \colorbox{YellowOrange}{RNN-basierte}, \colorbox{Cyan}{CNN-basierte}, \colorbox{OliveGreen}{GNN-basierte}
 \begin{table}
     \centering
-    \begin{tabular}{p{1.5cm}|l|l|l|l}
-        benötigen                             & ?                                     & Farbbild                                          & Tiefenbild                                        & 3D Pointcloud                               \\\hline
-        \multirow{3}{1.5cm}{3D Modell}        &                                       & Contour Matching                                  & se-TrackNet\cite{se-TrackNet}                     & Robust Gaussian Filter\cite{GaussianFilter} \\
-                                              &                                       & DeepIM\cite{Deepim}                               & dbotPF\cite{dbotPF}                               &                                             \\
-                                              &                                       &                                                   &                                                   &                                             \\\hline
-        \multirow{3}{1.5cm}{Kategorie Modell} & NOCS\cite{NormalizedObjectCoordiante} & Feature Matching                                  &                                                   &                                             \\
-                                              &                                       & KeypointNet\cite{KeypointNet}                     & 6-PACK\cite{6pack}                                &                                             \\
-                                              &                                       &                                                   &                                                   &                                             \\\hline
-        \multirow{3}{1.5cm}{ohne Modell}      &                                       & Iterative Closest Point                           & MaskFusion\cite{MaskFusion}                       & ICP\cite{ICP}                               \\
-                                              &                                       & Analyse-durch-Synthese \cite{CategoryLevelObject} & Analyse-durch-Synthese \cite{CategoryLevelObject} & TEASER++\cite{Teaser++}                     \\
-                                              &                                       &                                                   & BundleTrack\cite{BundleTrack}                     &                                             \\
-                                              &                                       & PoseCNN\cite{PoseCNN}                             & PoseCNN\cite{PoseCNN}+ICP\cite{ICP}               &                                             \\
+    \begin{tabular}{p{1.5cm}|l|l|l}
+        benötigen                             & Farbbild                                          & Tiefenbild                                             & 3D Pointcloud                               \\\hline
+        \multirow{3}{1.5cm}{3D Modell}        & Contour Matching                                  & \colorbox{Cyan}{se-TrackNet}\cite{se-TrackNet}         & Robust Gaussian Filter\cite{GaussianFilter} \\
+                                              & \colorbox{Thistle}{DeepIM}\cite{Deepim}           & dbotPF\cite{dbotPF}                                    &                                             \\
+                                              &                                                   &                                                        &                                             \\\hline
+        \multirow{3}{1.5cm}{Kategorie Modell} & Feature Matching                                  & \colorbox{Cyan}{NOCS}\cite{NormalizedObjectCoordiante} &                                             \\
+                                              & KeypointNet\cite{KeypointNet}                     & 6-PACK\cite{6pack}                                     &                                             \\
+                                              &                                                   &                                                        &                                             \\\hline
+        \multirow{3}{1.5cm}{ohne Modell}      & Iterative Closest Point                           & MaskFusion\cite{MaskFusion}                            & ICP\cite{ICP}                               \\
+                                              & Analyse-durch-Synthese \cite{CategoryLevelObject} & Analyse-durch-Synthese \cite{CategoryLevelObject}      & TEASER++\cite{Teaser++}                     \\
+                                              &                                                   & \colorbox{YellowOrange}{BundleTrack}\cite{BundleTrack} &                                             \\
+                                              & PoseCNN\cite{PoseCNN}                             & PoseCNN\cite{PoseCNN}+ICP\cite{ICP}                    &                                             \\
     \end{tabular}
-    \caption{Übersicht unterschiedlicher Verfahren}
+    \caption{Übersicht unterschiedlicher Verfahren unterscheidbar nach \colorbox{White}{\Gls{knn}}, \colorbox{Thistle}{\Gls{dnn}},\colorbox{YellowOrange}{\Gls{rnn}}, \colorbox{Cyan}{\Gls{cnn}} und \colorbox{OliveGreen}{\Gls{gnn}} }
     \label{ubersicht}
 \end{table}
 
