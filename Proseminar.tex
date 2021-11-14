@@ -353,10 +353,10 @@
     \subsection{Teaser}
     Teaser\cite{Teaser++} ist ein Algorithmus für die Registrierung von zwei 3D-Punktesätzen bei Vorhandensein einer großen Anzahl von Ausreißerkorrespondenzen.
     Zunächst wird ein neues Registrierungsproblem formuliert, indem die Kosten der abgeschnittenen kleinsten Quadrate (TLS) verwendet werden, die die Schätzung unempfindlich gegenüber einem großen Anteil von falschen Korrespondenzen macht.
-    Anschließend entkoppelt ein allgemeiner graphentheoretischer Rahmen Skalen-, Rotations- und Translationsschätzungen, der eine Kaskade für die drei Transformationen lösen. Während jedes Teilproblem (Skalen-, Rotations- und Translationsabschätzung) nicht-konvex und kombinatorisch ist, 
-    (i) kann die TLS-Skalierung und Translationsschätzung in polynomialer Zeit über ein adaptives Abstimmungsverfahren gelöst werden, 
-    (ii) die TLS-Rotationsschätzung kann zu einem semidefiniten Programm umgewandelt werden und ist selbst bei extremen Ausreißerquoten robust, und 
-    (iii) der graphentheoretische Rahmen ermöglicht eine drastische Reduzierung von Ausreißern durch die Suche nach der maximalen Clique. 
+    Anschließend entkoppelt ein allgemeiner graphentheoretischer Rahmen Skalen-, Rotations- und Translationsschätzungen, der eine Kaskade für die drei Transformationen lösen. Während jedes Teilproblem (Skalen-, Rotations- und Translationsabschätzung) nicht-konvex und kombinatorisch ist,
+    (i) kann die TLS-Skalierung und Translationsschätzung in polynomialer Zeit über ein adaptives Abstimmungsverfahren gelöst werden,
+    (ii) die TLS-Rotationsschätzung kann zu einem semidefiniten Programm umgewandelt werden und ist selbst bei extremen Ausreißerquoten robust, und
+    (iii) der graphentheoretische Rahmen ermöglicht eine drastische Reduzierung von Ausreißern durch die Suche nach der maximalen Clique.
     Der Algorithmus wird TEASER (Truncated least squares Estimation And SEmidefinite Relaxation) genannt.
 
     TEASER ist in MATLAB implementiert, verwendet cvx\cite{cvx}, um die konvexe Relaxation zu lösen, und nutzt den Algorithmus \cite{Mosek}, um die maximalen Kluster im beschnittenen TIM-Graphen zu finden. TEASER++ ist die schnelle implementierung des TEASER Algorithmus in C++. TEASER++ folgt dem gleichen entkoppelten Ansatz, die einzige Ausnahme ist, dass die abgestufte Nicht-Konvexität verwendet wird, um das Rotations-Teilproblem zu lösen und das Douglas- Rachford-Splitting genutzt wird, um die globale Optimalität effizient zu zertifizieren.
@@ -379,73 +379,80 @@
         \item[Laufzeit] durchschnittlich $0,059$[s]
     \end{description*}
 
-    \subsection{seTrackNet}
+    \subsection{se(3)-TrackNet}
+    se(3)-TrackNet\cite{se-TrackNet} ist ein datengesteuerter Optimierungsansatz für die langfristige 6D-Positionsverfolgung. Er zielt darauf ab die optimale relative Pose zu identifizieren, die sich aus der aktuellen RGB-D Beobachtung und eines synthetischen Bildes, das auf der vorherigen besten Schätzung und dem Modell des Objekts beruht, bildet. Der wichtigste Beitrag ist hierbei eine neuronale Netzarchitektur, die die Merkmalskodierung in geeigneter Weise entflechtet, um die Domänenverschiebung zu reduzieren, und eine effektive 3D-Orientierungsdarstellung mittels Lie-Algebra erstellt. Folglich kann das Netzwerk, auch wenn es nur mit synthetischen Daten trainiert wird, effektiv mit realen Bildern arbeiten.
+    Umfassende Experimente mit Benchmarks - bestehenden als auch einen neuen Datensatz mit signifikanten Verdeckungen im Zusammenhang mit Objektmanipulation - zeigen, dass der vorgeschlagene Ansatz durchgängig robuste Schätzungen erzielt und Alternativen übertrifft, auch wenn obwohl diese mit echten Bildern trainiert wurden.
+    Die Pipeline zur Erzeugung synthetischer Daten ist in Blender\footnote{\href{https://www.blender.org/}{https://www.blender.org/}} implementiert. Um Bilder zu rendern, wird die Kameraposition zufällig einer Kugel mit einem Radius zwischen $0,6$ und $1,3$m zufällig abgetastet, gefolgt von einer zusätzlichen Drehung entlang der z-Achse der Kamera, die zwischen zwischen $0$ und $360$ Grad.
+    se(3)-TrackNet erweist sich als robust gegenüber großen Verdeckungen und plötzlichen Neuorientierungen im Datensatz, die eine Herausforderung für konkurrierende Ansätze darstellen. Trotz dieser wünschenswerten Eigenschaften des vorgeschlagenen Netzwerks besteht eine Einschränkung darin, dass ein CAD-Objektmodell erforderlich ist.
+
+    Der Ansatz rechnerisch sehr effizientest und erreicht eine Verfolgungsfrequenz von 90,9 Hz.
 
     \begin{description*}
-        \item[Modell] 
-        \item[Video-Input] 
-        \item[Datensatz] 
-        \item[Genauigkeit]
+        \item[Modell] synthetische CAD Modelle
+        \item[Video-Input] RGB-D
+        \item[Datensatz] \Gls{ycb}, \Gls{YCBInEOAT}
+        \item[Genauigkeit] Ergebnisse aus \Gls{AUC} Messung
         \begin{itemize*}
-            \item 
+            \item ADD $92,66\%$
+            \item ADD-S $95,33\%$
         \end{itemize*}
-        \item[Ressourcen] 
-        \item[Laufzeit]
+        \item[Ressourcen] Experimente auf Desktop mit Intel Xeon(R) E5-1660 v3@3.00GHz CPU. Training auf einer NVIDIA RTX 2080 Ti GPU bzw. NVIDIA Tesla K40c GPU
+        \item[Laufzeit] $90,9$Hz
     \end{description*}
 
     \subsection{dbotPF}
 
     \begin{description*}
-        \item[Modell] 
-        \item[Video-Input] 
-        \item[Datensatz] 
+        \item[Modell]
+        \item[Video-Input]
+        \item[Datensatz]
         \item[Genauigkeit]
         \begin{itemize*}
-            \item 
+            \item
         \end{itemize*}
-        \item[Ressourcen] 
+        \item[Ressourcen]
         \item[Laufzeit]
     \end{description*}
 
     \subsection{ICP}
 
     \begin{description*}
-        \item[Modell] 
-        \item[Video-Input] 
-        \item[Datensatz] 
+        \item[Modell]
+        \item[Video-Input]
+        \item[Datensatz]
         \item[Genauigkeit]
         \begin{itemize*}
-            \item 
+            \item
         \end{itemize*}
-        \item[Ressourcen] 
+        \item[Ressourcen]
         \item[Laufzeit]
     \end{description*}
 
     \subsection{KeypointNet}
 
     \begin{description*}
-        \item[Modell] 
-        \item[Video-Input] 
-        \item[Datensatz] 
+        \item[Modell]
+        \item[Video-Input]
+        \item[Datensatz]
         \item[Genauigkeit]
         \begin{itemize*}
-            \item 
+            \item
         \end{itemize*}
-        \item[Ressourcen] 
+        \item[Ressourcen]
         \item[Laufzeit]
     \end{description*}
 
     \subsection{NOCS}
 
     \begin{description*}
-        \item[Modell] 
-        \item[Video-Input] 
-        \item[Datensatz] 
+        \item[Modell]
+        \item[Video-Input]
+        \item[Datensatz]
         \item[Genauigkeit]
         \begin{itemize*}
-            \item 
+            \item
         \end{itemize*}
-        \item[Ressourcen] 
+        \item[Ressourcen]
         \item[Laufzeit]
     \end{description*}
 
@@ -460,9 +467,9 @@ Vergleich der unterschiedlichen Methoden unterscheidbar nach \colorbox{Mahogany}
     \centering
     \begin{tabular}{p{1.5cm}|l|l|l|l}
         benötigen                             & ?                                     & Farbbild                                          & Tiefenbild                                        & 3D Pointcloud                               \\\hline
-        \multirow{3}{1.5cm}{3D Modell}        &                                       & Contour Matching                                  &                                                   & Robust Gaussian Filter\cite{GaussianFilter} \\
+        \multirow{3}{1.5cm}{3D Modell}        &                                       & Contour Matching                                  & se-TrackNet\cite{se-TrackNet}                     & Robust Gaussian Filter\cite{GaussianFilter} \\
                                               & dbotPF\cite{dbotPF}                   & DeepIM\cite{Deepim}                               &                                                   &                                             \\
-                                              & se-TrackNet\cite{se-TrackNet}         &                                                   &                                                   &                                             \\\hline
+                                              &                                       &                                                   &                                                   &                                             \\\hline
         \multirow{3}{1.5cm}{Kategorie Modell} & NOCS\cite{NormalizedObjectCoordiante} & Feature Matching                                  &                                                   &                                             \\
                                               & KeypointNet\cite{KeypointNet}         &                                                   & 6-PACK\cite{6pack}                                &                                             \\
                                               &                                       &                                                   &                                                   &                                             \\\hline
