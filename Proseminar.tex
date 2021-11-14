@@ -98,6 +98,10 @@
     name={YCB-Video},
     description={80 Videos zum Training mit 2.949 Schlüsselbildern, die aus den restlichen 12 Testvideos extrahiert wurden.}
 }
+\newglossaryentry{stanford}{
+    name={Stanford 3D Scanning Repository},
+    description={vier Datensätze Hase, Armadillo, Drache und Buddha als Punktwolke\cite{StanfordScanning}}
+}
 \newglossaryentry{bot}{
     name={Bayesian Object Tracking},
     description={37 aufgezeichnete Sequenzen von Tiefenbildern. Jede Sequenz ist ca. zwei Minuten lang und zeigt eines von sechs Objekten mit und ohne Teilverdeckung, die mit unterschiedlichen Geschwindigkeiten bewegt werden. Um die Verfolgungsleistung bei verschiedenen Geschwindigkeiten zu bewerten, enthält der Datensatz Sequenzen mit drei Geschwindigkeitskategorien. Der Abstand zwischen Kamera und Objekt liegt zwischen 0,8 m und 1,1 m. \cite{bot}}
@@ -324,7 +328,6 @@
         \item[Laufzeit]
     \end{description*}
 
-
     \subsection{Robust Gaussian Filter}
     Modellbasierte 3D-Verfolgung von Objekten bei dichten Tiefenbildern als Eingabe mithilfe Robuster Gauss Filter\cite{GaussianFilter}.
     Zwei Schwierigkeiten schließen die Anwendung eines Standard-Gauß-Filters auf dieses Problem aus. Tiefensensoren sind von Messrauschen gekennzeichnet und werden durch eine Robustifizierungsmethode für Gaußfilter behoben. Dadurch wird eine heuristische Ausreißer-Erkennungsmethode verwendet, die einfache Messungen ablehnt, wenn sie nicht mit dem Modell übereinstimmen.
@@ -347,6 +350,36 @@
         \item[Laufzeit] 30Hz
     \end{description*}
 
+    \subsection{Teaser}
+    Teaser\cite{Teaser++} ist ein Algorithmus für die Registrierung von zwei 3D-Punktesätzen bei Vorhandensein einer großen Anzahl von Ausreißerkorrespondenzen.
+    Zunächst wird ein neues Registrierungsproblem formuliert, indem die Kosten der abgeschnittenen kleinsten Quadrate (TLS) verwendet werden, die die Schätzung unempfindlich gegenüber einem großen Anteil von falschen Korrespondenzen macht.
+    Anschließend entkoppelt ein allgemeiner graphentheoretischer Rahmen Skalen-, Rotations- und Translationsschätzungen, der eine Kaskade für die drei Transformationen lösen. Während jedes Teilproblem (Skalen-, Rotations- und Translationsabschätzung) nicht-konvex und kombinatorisch ist, 
+    (i) kann die TLS-Skalierung und Translationsschätzung in polynomialer Zeit über ein adaptives Abstimmungsverfahren gelöst werden, 
+    (ii) die TLS-Rotationsschätzung kann zu einem semidefiniten Programm umgewandelt werden und ist selbst bei extremen Ausreißerquoten robust, und 
+    (iii) der graphentheoretische Rahmen ermöglicht eine drastische Reduzierung von Ausreißern durch die Suche nach der maximalen Clique. 
+    Der Algorithmus wird TEASER (Truncated least squares Estimation And SEmidefinite Relaxation) genannt.
+
+    TEASER ist in MATLAB implementiert, verwendet cvx\cite{cvx}, um die konvexe Relaxation zu lösen, und nutzt den Algorithmus \cite{Mosek}, um die maximalen Kluster im beschnittenen TIM-Graphen zu finden. TEASER++ ist die schnelle implementierung des TEASER Algorithmus in C++. TEASER++ folgt dem gleichen entkoppelten Ansatz, die einzige Ausnahme ist, dass die abgestufte Nicht-Konvexität verwendet wird, um das Rotations-Teilproblem zu lösen und das Douglas- Rachford-Splitting genutzt wird, um die globale Optimalität effizient zu zertifizieren.
+
+    Der Algorithmus wurde mit zwei state-of-the-art Techniken GORE\cite{gore} und FGR\cite{fgr} verglichen.
+
+    \begin{description*}
+        \item[Modell] ohne
+        \item[Video-Input] RGB-D
+        \item[Datensatz] \Gls{stanford}
+        \item[Genauigkeit]
+        \begin{itemize*}
+            \item Korrekte Registierung $91,69$ [\%]
+            \item Rotationsfehler $0,066$ [Grad]
+            \item Translationsfehler $0,069$ [m]
+            \item Anzahl an FPFH\cite{fpfh} Korrespondenzen $525$
+            \item FPFH Ausreißerquote $6,53$ [\%]
+        \end{itemize*}
+        \item[Ressourcen] Alle Tests wurden auf einem Laptop mit einer i7-8850H CPU und 32GB RAM durchgeführt
+        \item[Laufzeit] durchschnittlich $0,059$[s]
+    \end{description*}
+
+
     \section{Fazit}
 
 \end{multicols*}
@@ -357,14 +390,14 @@ Vergleich der unterschiedlichen Methoden unterscheidbar nach \colorbox{Mahogany}
     \centering
     \begin{tabular}{p{1.5cm}|l|l|l|l}
         benötigen                             & ?                                     & Farbbild                                          & Tiefenbild                                        & 3D Pointcloud                               \\\hline
-        \multirow{3}{1.5cm}{3D Modell}        & RGF\cite{GaussianFilter}              & Contour Matching                                  &                                                   & Robust Gaussian Filter\cite{GaussianFilter} \\
+        \multirow{3}{1.5cm}{3D Modell}        &                                       & Contour Matching                                  &                                                   & Robust Gaussian Filter\cite{GaussianFilter} \\
                                               & dbotPF\cite{dbotPF}                   & DeepIM\cite{Deepim}                               &                                                   &                                             \\
                                               & se-TrackNet\cite{se-TrackNet}         &                                                   &                                                   &                                             \\\hline
         \multirow{3}{1.5cm}{Kategorie Modell} & NOCS\cite{NormalizedObjectCoordiante} & Feature Matching                                  &                                                   &                                             \\
                                               & KeypointNet\cite{KeypointNet}         &                                                   & 6-PACK\cite{6pack}                                &                                             \\
                                               &                                       &                                                   &                                                   &                                             \\\hline
         \multirow{3}{1.5cm}{ohne Modell}      & ICP\cite{ICP}                         & Iterative Closest Point                           & MaskFusion\cite{MaskFusion}                       &                                             \\
-                                              & TEASER++\cite{Teaser++}               & Analyse-durch-Synthese \cite{CategoryLevelObject} & Analyse-durch-Synthese \cite{CategoryLevelObject} &                                             \\
+                                              &                                       & Analyse-durch-Synthese \cite{CategoryLevelObject} & Analyse-durch-Synthese \cite{CategoryLevelObject} & TEASER++\cite{Teaser++}                     \\
                                               &                                       &                                                   & BundleTrack\cite{BundleTrack}                     &                                             \\
                                               &                                       & PoseCNN\cite{PoseCNN}                             & PoseCNN\cite{PoseCNN}+ICP\cite{ICP}               &                                             \\
     \end{tabular}
