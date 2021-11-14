@@ -417,16 +417,24 @@
         \item[Laufzeit] 200 Posen pro Kamerabild bei 30Hz Bildrate
     \end{description*}
 
-    \subsection{ICP}
+    \subsection{Open3D}
+    Open3D\cite{ICP} ist eine Open-Source-Bibliothek für die schnelle Entwicklung von Software, die mit 3D-Daten arbeitet.
+    Das Frontend stellt eine Reihe sorgfältig ausgewählter Datenstrukturen und Algorithmen sowohl in C++ als auch in Python zur Verfügung. Das Backend ist hochgradig optimiert und auf Parallelisierung ausgelegt.
+    Open3D bietet Implementierungen von mehreren moderner State-of-the-Art Oberflächenregistrierungsmethoden, einschließlich paarweise globale Registrierung, paarweise lokale Verfeinerung und Mehrwege Registrierung unter Verwendung der Pose-Graph-Optimierung.
+    Der Arbeitsablauf beginnt mit dem Einlesen roher Punktwolken, deren Downsampling und die Schätzung der Normalen.
+    Es nimmt eine RGB-D-Sequenz als Eingabe und durchläuft drei Hauptschritte.
+    
+    (i) Aufbau lokaler geometrischer Oberflächen (als Fragmente bezeichnet) aus kurzen Teilsequenzen der RGB-D-Eingangssequenz.
+
+    (ii) Globale Ausrichtung der Fragmente, um Fragmentposen und eine Kamerakalibrierungsfunktion zu erhalten.
+
+    (iii) Integration von RGB-D-Bildern zur Erstellung eines Netzmodells für die Szene.
 
     \begin{description*}
-        \item[Modell]
-        \item[Video-Input]
-        \item[Datensatz]
+        \item[Modell] ohne
+        \item[Video-Input] RGB-D
+        \item[Datensatz] SceneNN\cite{scenenn}
         \item[Genauigkeit]
-        \begin{itemize*}
-            \item
-        \end{itemize*}
         \item[Ressourcen]
         \item[Laufzeit]
     \end{description*}
@@ -476,7 +484,7 @@ Vergleich der unterschiedlichen Methoden unterscheidbar nach \colorbox{Mahogany}
         \multirow{3}{1.5cm}{Kategorie Modell} & NOCS\cite{NormalizedObjectCoordiante} & Feature Matching                                  &                                                   &                                             \\
                                               & KeypointNet\cite{KeypointNet}         &                                                   & 6-PACK\cite{6pack}                                &                                             \\
                                               &                                       &                                                   &                                                   &                                             \\\hline
-        \multirow{3}{1.5cm}{ohne Modell}      & ICP\cite{ICP}                         & Iterative Closest Point                           & MaskFusion\cite{MaskFusion}                       &                                             \\
+        \multirow{3}{1.5cm}{ohne Modell}      &                                       & Iterative Closest Point                           & MaskFusion\cite{MaskFusion}                       & ICP\cite{ICP}                               \\
                                               &                                       & Analyse-durch-Synthese \cite{CategoryLevelObject} & Analyse-durch-Synthese \cite{CategoryLevelObject} & TEASER++\cite{Teaser++}                     \\
                                               &                                       &                                                   & BundleTrack\cite{BundleTrack}                     &                                             \\
                                               &                                       & PoseCNN\cite{PoseCNN}                             & PoseCNN\cite{PoseCNN}+ICP\cite{ICP}               &                                             \\
