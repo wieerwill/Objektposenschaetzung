@@ -102,6 +102,10 @@
     name={Stanford 3D Scanning Repository},
     description={vier Datensätze Hase, Armadillo, Drache und Buddha als Punktwolke\cite{StanfordScanning}}
 }
+\newglossaryentry{pascal}{
+    name={Pascal3D+},
+    description={Referenzpunkte für den supervised Vergleich mit 12 Punkten für Autos, 10 für Stühle und 8 für Flugzeuge}
+}
 \newglossaryentry{bot}{
     name={Bayesian Object Tracking},
     description={37 aufgezeichnete Sequenzen von Tiefenbildern. Jede Sequenz ist ca. zwei Minuten lang und zeigt eines von sechs Objekten mit und ohne Teilverdeckung, die mit unterschiedlichen Geschwindigkeiten bewegt werden. Um die Verfolgungsleistung bei verschiedenen Geschwindigkeiten zu bewerten, enthält der Datensatz Sequenzen mit drei Geschwindigkeitskategorien. Der Abstand zwischen Kamera und Objekt liegt zwischen 0,8 m und 1,1 m. \cite{bot}}
@@ -423,7 +427,7 @@
     Open3D bietet Implementierungen von mehreren moderner State-of-the-Art Oberflächenregistrierungsmethoden, einschließlich paarweise globale Registrierung, paarweise lokale Verfeinerung und Mehrwege Registrierung unter Verwendung der Pose-Graph-Optimierung.
     Der Arbeitsablauf beginnt mit dem Einlesen roher Punktwolken, deren Downsampling und die Schätzung der Normalen.
     Es nimmt eine RGB-D-Sequenz als Eingabe und durchläuft drei Hauptschritte.
-    
+
     (i) Aufbau lokaler geometrischer Oberflächen (als Fragmente bezeichnet) aus kurzen Teilsequenzen der RGB-D-Eingangssequenz.
 
     (ii) Globale Ausrichtung der Fragmente, um Fragmentposen und eine Kamerakalibrierungsfunktion zu erhalten.
@@ -440,14 +444,20 @@
     \end{description*}
 
     \subsection{KeypointNet}
+    KeypointNet\cite{KeypointNet} ist ein durchgängiges geometrisches Konzept zum Erlernen eines optimalen Satzes von kategoriespezifischen 3D-Keypoints zusammen mit ihren Detektoren. Ausgehend von einem einzelnen Bild extrahiert KeypointNet 3D-Keypoints, die für eine nachgelagerte Aufgabe optimiert sind.
+    Zur Demonstratiob diesen Rahmen für die 3D-Positionsschätzung, indem wir ein differenzierbares Ziel vorschlagen, das den optimalen Satz von Keypoints sucht, um zur Wiederherstellung der relativen Pose zwischen zwei Ansichten eines Objekts zu gelangen. Das Modell entdeckt geometrisch und semantisch konsistente Keypoints über Blickwinkel und Instanzen einer Objektkategorie. Wichtig ist, dass das Ende-zu-Ende-Rahmenwerk das keine fundierten Keypoint-Annotationen verwendet, eine vollständig überwachte Basislösung übertrifft mit der gleichen neuronalen Netzwerkarchitektur bei der Posenschätzung übertrifft.
 
     \begin{description*}
-        \item[Modell]
-        \item[Video-Input]
-        \item[Datensatz]
+        \item[Modell] 3D Kategorie Modell
+        \item[Video-Input] RGB
+        \item[Datensatz] \Gls{ShapeNetCore}, \Gls{pascal}
         \item[Genauigkeit]
         \begin{itemize*}
-            \item
+            \item mittelere Genauigkeit $96,2\%$
+            \item mediane Genauigkeit $99,0\%$
+            \item mittlerer Winkelabstandsfehler $14,404$
+            \item medianer Winkelabstandsfehler $4,838$
+            \item 3D Stanardfehler $0,199$
         \end{itemize*}
         \item[Ressourcen]
         \item[Laufzeit]
@@ -482,7 +492,7 @@ Vergleich der unterschiedlichen Methoden unterscheidbar nach \colorbox{Mahogany}
                                               &                                       & DeepIM\cite{Deepim}                               & dbotPF\cite{dbotPF}                               &                                             \\
                                               &                                       &                                                   &                                                   &                                             \\\hline
         \multirow{3}{1.5cm}{Kategorie Modell} & NOCS\cite{NormalizedObjectCoordiante} & Feature Matching                                  &                                                   &                                             \\
-                                              & KeypointNet\cite{KeypointNet}         &                                                   & 6-PACK\cite{6pack}                                &                                             \\
+                                              &                                       & KeypointNet\cite{KeypointNet}                     & 6-PACK\cite{6pack}                                &                                             \\
                                               &                                       &                                                   &                                                   &                                             \\\hline
         \multirow{3}{1.5cm}{ohne Modell}      &                                       & Iterative Closest Point                           & MaskFusion\cite{MaskFusion}                       & ICP\cite{ICP}                               \\
                                               &                                       & Analyse-durch-Synthese \cite{CategoryLevelObject} & Analyse-durch-Synthese \cite{CategoryLevelObject} & TEASER++\cite{Teaser++}                     \\
