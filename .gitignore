@@ -1,11 +1,13 @@
 *.code-workspace
 *.ist
 
-# additional folders not required
+# additional folders and files not required
 BundleTrack-master/
 TEASER-plusplus-master/
 20objects/
 quellen/
+*.pdf
+*.tmp
 
 # ffmpeg
 frame*.png
