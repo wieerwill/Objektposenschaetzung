@@ -1,6 +1,17 @@
 *.code-workspace
 *.ist
 
+# additional folders not required
+BundleTrack-master/
+TEASER-plusplus-master/
+20objects/
+quellen/
+
+# ffmpeg
+frame*.png
+palette.png
+*.gif
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
