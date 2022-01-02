@@ -240,7 +240,7 @@
     Was die Erkennung betrifft, so kann MaskFusion nur Objekte aus Klassen erkennen, auf die die MaskRCNN trainiert wurde (derzeit die 80 Klassen des \Gls{mscoco}-Datensatzes) und berücksichtigt keine Fehlklassifizierung von Objektbeschriftungen.
 
     \begin{description*}
-        \item[Modell] mit Modell
+        \item[Modell] ohne und mit Modell
         \item[Video-Input] RGB-D
         \item[Datensatz] \Gls{mscoco}
         \item[Genauigkeit] \Gls{NOCS}
@@ -309,7 +309,7 @@
 
     Die Methode erreicht Ende-zu-Ende 6D Posenschätzung und ist sehr robust gegenüber Verdeckungen zwischen Objekten.
     \begin{description*}
-        \item[Modell] ohne
+        \item[Modell] 3D Modell
         \item[Video-Input] RGB, RGB-D
         \item[Datensatz] \Gls{ycb}, \Gls{Linemod}, \Gls{Occlusion}
         \item[Genauigkeit] Ergebnisse aus \Gls{AUC} Messung bei RGB
@@ -340,7 +340,7 @@
 
     \begin{description*}
         \item[Modell] CAD-Modell
-        \item[Video-Input] RGB-D
+        \item[Video-Input] RGB-D, Pointcloud
         \item[Datensatz] \Gls{bot}
         \item[Genauigkeit]
         \begin{itemize*}
@@ -368,7 +368,7 @@
 
     \begin{description*}
         \item[Modell] ohne
-        \item[Video-Input] RGB-D
+        \item[Video-Input] RGB-D, Pointcloud
         \item[Datensatz] \Gls{stanford}
         \item[Genauigkeit]
         \begin{itemize*}
@@ -493,16 +493,13 @@
     \centering
     \begin{tabular}{p{1.5cm}|l|l|l}
         benötigen                             & Farbbild                                          & Tiefenbild                                             & 3D Pointcloud                               \\\hline
-        \multirow{3}{1.5cm}{3D Modell}        & Contour Matching                                  & \colorbox{Cyan}{se-TrackNet}\cite{se-TrackNet}         & Robust Gaussian Filter\cite{GaussianFilter} \\
-                                              & \colorbox{Thistle}{DeepIM}\cite{Deepim}           & dbotPF\cite{dbotPF}                                    &                                             \\
-                                              &                                                   &                                                        &                                             \\\hline
-        \multirow{3}{1.5cm}{Kategorie Modell} & Feature Matching                                  & \colorbox{Cyan}{NOCS}\cite{NormalizedObjectCoordiante} &                                             \\
-                                              & KeypointNet\cite{KeypointNet}                     & 6-PACK\cite{6pack}                                     &                                             \\
-                                              &                                                   &                                                        &                                             \\\hline
-        \multirow{3}{1.5cm}{ohne Modell}      & Iterative Closest Point                           & MaskFusion\cite{MaskFusion}                            & ICP\cite{ICP}                               \\
-                                              & Analyse-durch-Synthese \cite{CategoryLevelObject} & Analyse-durch-Synthese \cite{CategoryLevelObject}      & TEASER++\cite{Teaser++}                     \\
-                                              &                                                   & \colorbox{YellowOrange}{BundleTrack}\cite{BundleTrack} &                                             \\
-                                              & PoseCNN\cite{PoseCNN}                             & PoseCNN\cite{PoseCNN}+ICP\cite{ICP}                    &                                             \\
+        \multirow{3}{1.5cm}{3D Modell}        & \colorbox{Cyan}{PoseCNN}\cite{PoseCNN}            & \colorbox{Cyan}{se-TrackNet}\cite{se-TrackNet}         & Robust Gaussian Filter\cite{GaussianFilter} \\
+                                              & \colorbox{Thistle}{DeepIM}\cite{Deepim}           & dbotPF\cite{dbotPF}                                    & Iterative Closest Point\cite{ICP}           \\
+                                              &                                                   & PoseCNN\cite{PoseCNN}+ICP\cite{ICP}                    &                                             \\\hline
+        \multirow{3}{1.5cm}{Kategorie Modell} & KeypointNet\cite{KeypointNet}                     & \colorbox{Cyan}{NOCS}\cite{NormalizedObjectCoordiante} &                                             \\
+                                              &                                                   & 6-PACK\cite{6pack}                                     &                                             \\\hline
+        \multirow{3}{1.5cm}{ohne Modell}      & Analyse-durch-Synthese \cite{CategoryLevelObject} & MaskFusion\cite{MaskFusion}                            & \colorbox{Thistle}{TEASER++}\cite{Teaser++} \\
+                                              &                                                   & \colorbox{Thistle}{BundleTrack}\cite{BundleTrack}      &                                             \\
     \end{tabular}
     \caption{Übersicht unterschiedlicher Verfahren unterscheidbar nach \colorbox{White}{\Gls{knn}}, \colorbox{Thistle}{\Gls{dnn}},\colorbox{YellowOrange}{\Gls{rnn}}, \colorbox{Cyan}{\Gls{cnn}} und \colorbox{OliveGreen}{\Gls{gnn}} }
     \label{ubersicht}
