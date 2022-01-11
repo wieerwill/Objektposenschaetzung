@@ -8,6 +8,8 @@ TEASER-plusplus-master/
 quellen/
 *.pdf
 *.tmp
+*.xmp
+*.mp4
 
 # ffmpeg
 frame*.png
